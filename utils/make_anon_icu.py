@@ -41,5 +41,5 @@ for person in persons:
         print(f"original: {v}   replacement: {replacement}")
 
 
-with Path('../data/clean.json').open('w') as f:
+with Path('../data/icu.json').open('w') as f:
     json.dump(persons, f, indent=4)
