@@ -1,6 +1,10 @@
+# Plan
+
 comparing streamlit to dash and I don't think that streamlit is mature enough
 dash is well documented and comes with a lot of the features that I would have to build myself
 
+do all of this just in dash
+don't worry about dockerising for now
 build a dash version of the sitrep dashboard
 
 stage 1
@@ -17,3 +21,6 @@ then filters the table holding the patient details
 
 stage 4
 make that table editable
+
+# Set-up
+git clone or navigate to `./dash-rep`
