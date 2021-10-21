@@ -2,3 +2,9 @@
 *.sublime-project
 
 *.pyc
+
+# secure and scratch
+.env
+secret*
+scratch/*
+scratch.*
