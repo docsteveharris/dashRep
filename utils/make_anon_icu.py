@@ -1,3 +1,11 @@
+# run this script from the datascience desktop to deidentify sample data
+# secrets is excluded from git etc
+# expects a single json file from the icu/live API
+# e.g 
+# curl -X 'GET' \
+#   'http://uclvlddpragae08:5006/icu/live/T03/ui' \
+#   -H 'accept: application/json'
+
 import json
 from pathlib import Path
 from datetime import datetime, date
