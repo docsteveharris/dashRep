@@ -1,3 +1,4 @@
+from collections import OrderedDict
 from pathlib import Path
 
 import pandas as pd
@@ -9,24 +10,30 @@ import dash_bootstrap_components as dbc
 
 DATA_SOURCE = Path('../data/icu.json')
 # TODO convert to ordered dictionary
-COLS = {
-    'mrn': 'MRN',
-    'name': 'Full Name',
-    'sex': 'Sex',
-    'dob': 'DoB',
-    'admission_age_years': 'Age',
+COLS = OrderedDict({
     'ward_code': 'Ward',
     'bed_code': 'Bed',
-    'wim_1': 'Work Intensity'}
+
+    'admission_dt': 'Admission',
+
+    'mrn': 'MRN',
+    'name': 'Full Name',
+    'admission_age_years': 'Age',
+    'sex': 'Sex',
+    'dob': 'DoB',
+
+    'wim_1': 'Work Intensity'})
 
 
 
+# Read in the data
 df = pd.read_json(DATA_SOURCE)
 
 # Prep and wrangle
-
 df['admission_dt'] = pd.to_datetime(df['admission_dt'], infer_datetime_format=True)
 df['admission_dt'] = df['admission_dt'].dt.strftime("%H:%M %d %b %Y")
+df = df[COLS.keys()]
+df.sort_values(by='bed_code', inplace=True)
 
 
 columns=[{"name": i, "id": i} for i in df.columns if i in COLS.keys()]
@@ -34,6 +41,7 @@ for column in columns:
     column['name'] = COLS[column['id']]
     if column['id'] == 'admission_dt':
         column['type'] = 'datetime'
+
 
 app = dash.Dash(external_stylesheets=[dbc.themes.BOOTSTRAP])
 
@@ -44,7 +52,15 @@ app.layout = dbc.Container([
     id='tbl',
     columns=columns,
     data=df.to_dict('records'),
-    page_size=5,
+    style_cell={'padding': '5px'},
+    style_cell_conditional=[
+        {
+            'if': {'column_id': 'name'},
+            'textAlign': 'left'
+        }
+    ],
+    sort_action='native',
+    page_size=10,
     style_table={'overflowX': 'auto'},
     )])
 
