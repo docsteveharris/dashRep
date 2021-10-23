@@ -1,11 +1,12 @@
 from collections import OrderedDict
 from pathlib import Path
+from datetime import datetime
 
 import pandas as pd
 import numpy as np
 
 import dash
-from dash import Dash, Input, Output, State, html
+from dash import Dash, Input, Output, State, html, dcc
 from dash import dash_table as dt
 import dash_bootstrap_components as dbc
 
@@ -73,7 +74,12 @@ app.layout = dbc.Container([
         sort_action='native',
         page_size=10,
     ),
-    dbc.Alert(html.Plaintext(id='active-cell-note'), color='danger')
+
+    dbc.Alert(html.Plaintext(id='active-cell-note'), color='warning'),
+    dbc.Alert(html.Plaintext(id='store-text'), color='info'),
+
+    dcc.Store(id='signal')
+
 ])
 
 
@@ -103,10 +109,38 @@ def active_cell_status(cell,data):
 
     col = cell['column_id']
     row = cell['row']
-    val = data[row][col] 
+    val = data[row][col]  # uses data to get value
+
     msg = f"Cell ({cell['row']},{cell['column']}) with the value {val} has been selected"
 
     return msg
+
+
+@app.callback(
+    Output('signal', 'data'),
+    Input('tbl', 'active_cell'),
+    State('tbl', 'data')
+)
+def active_cell_edit(cell, data):
+    now = str(datetime.now())
+    if not cell:
+        return f"No cell selected at {now}"
+
+    col = cell['column_id']
+    row = cell['row']
+    val = data[row][col]  # uses data to get value
+
+    msg = f"Cell ({cell['row']},{cell['column']}) with the value {val} was selected at {now}"
+
+    return msg
+
+
+@app.callback(
+    Output('store-text', 'children'),
+    Input('signal', 'data')
+    )
+def display_store(s):
+    return str(s)
 
 
 if __name__ == "__main__":
