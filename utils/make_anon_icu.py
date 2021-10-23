@@ -47,6 +47,8 @@ for person in persons:
         else:
             continue
         print(f"original: {v}   replacement: {replacement}")
+    # Empty value for user input
+    person['wim_r'] = None
 
 
 with Path('../data/icu.json').open('w') as f:

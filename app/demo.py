@@ -11,7 +11,6 @@ from dash import dash_table as dt
 import dash_bootstrap_components as dbc
 
 DATA_SOURCE = Path('../data/icu.json')
-# TODO convert to ordered dictionary
 COLS = OrderedDict({
     'ward_code': 'Ward',
     'bed_code': 'Bed',
@@ -103,7 +102,7 @@ def update_rows(timestamp, data, active_cell):
     Input('tbl', 'active_cell'),
     State('tbl', 'data')
 )
-def active_cell_status(cell,data):
+def active_cell_status(cell, data):
     if not cell:
         return 'No cell has been selected'
 
@@ -138,7 +137,7 @@ def active_cell_edit(cell, data):
 @app.callback(
     Output('store-text', 'children'),
     Input('signal', 'data')
-    )
+)
 def display_store(s):
     return str(s)
 
