@@ -30,8 +30,6 @@ COLS = OrderedDict({
 
 # Read in the data
 df = pd.read_json(DATA_SOURCE)
-# Empty column for user input
-df['wim_r'] = np.nan
 
 # Prep and wrangle
 df['admission_dt'] = pd.to_datetime(
@@ -58,7 +56,7 @@ app.layout = dbc.Container([
         columns=columns,
         data=df.to_dict('records'),
 
-        editable=True,
+        editable=False,
 
         style_cell={'padding': '5px'},
         style_cell_conditional=[
@@ -74,31 +72,48 @@ app.layout = dbc.Container([
         page_size=10,
     ),
 
-    dbc.Alert(html.Plaintext(id='active-cell-note'), color='warning'),
+    dbc.Alert(['Update work reported? ',
+               dcc.Input(id='active-cell-value',
+                         type='number',
+                         debounce=False)],
+              color='warning'),
     dbc.Alert(html.Plaintext(id='store-text'), color='info'),
 
-    dcc.Store(id='signal')
 
 ])
 
 
+# @app.callback(
+#     Output[])
+# def active_cell_update_value():
+#     #
+# @app.callback(
+#     Output('store-text', 'children'),
+#     Input('signal', 'data')
+# )
+# def display_store(s):
+#     return str(s)
+
 @app.callback(
     Output('tbl', 'data'),
-    Input('tbl', 'data_timestamp'),
-    [State('tbl', 'data'),
-     State('tbl', 'active_cell'),
-     ])
-def update_rows(timestamp, data, active_cell):
-    for row in data:
-        try:
-            row['wim_r'] = float(row['wim_1']) ** 2
-        except:
-            row['wim_r'] = 'NA'
-    return data
+    Input('active-cell-value', 'value'),
+    [State('tbl', 'data'), State('tbl', 'active_cell')])
+def update_work_reported(new_value, data, cell):
+
+    col = cell['column_id']
+    row = cell['row']
+    old_val = data[row][col]  # uses data to get value
+
+    if old_val == new_value or new_value is None:
+        return data
+    else:
+        data[row]['wim_r'] = new_value
+        return data
+
 
 
 @app.callback(
-    Output('active-cell-note', 'children'),
+    Output('active-cell-value', 'value'),
     Input('tbl', 'active_cell'),
     State('tbl', 'data')
 )
@@ -110,36 +125,9 @@ def active_cell_status(cell, data):
     row = cell['row']
     val = data[row][col]  # uses data to get value
 
-    msg = f"Cell ({cell['row']},{cell['column']}) with the value {val} has been selected"
+    # msg = f"Cell ({cell['row']},{cell['column']}) with the value {val} has been selected"
 
-    return msg
-
-
-@app.callback(
-    Output('signal', 'data'),
-    Input('tbl', 'active_cell'),
-    State('tbl', 'data')
-)
-def active_cell_edit(cell, data):
-    now = str(datetime.now())
-    if not cell:
-        return f"No cell selected at {now}"
-
-    col = cell['column_id']
-    row = cell['row']
-    val = data[row][col]  # uses data to get value
-
-    msg = f"Cell ({cell['row']},{cell['column']}) with the value {val} was selected at {now}"
-
-    return msg
-
-
-@app.callback(
-    Output('store-text', 'children'),
-    Input('signal', 'data')
-)
-def display_store(s):
-    return str(s)
+    return val
 
 
 if __name__ == "__main__":
