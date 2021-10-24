@@ -53,7 +53,7 @@ app.config.suppress_callback_exceptions = True
 
 
 app.layout = dbc.Container([
-    dbc.Alert('Wow! A data table in the browser'),
+    dbc.Alert(id='active-cell-value'),
     dbc.Label('Click a cell in the table to watch it turn red!!'),
 
     dcc.Interval(id='interval-data', interval=REFRESH_INTERVAL, n_intervals=0),
@@ -67,7 +67,6 @@ app.layout = dbc.Container([
         ]),
         color='info'),
 
-    dbc.Alert(id='active-cell-value'),
     # dbc.Alert(['Update work reported? ',
     #            dcc.Input(id='active-cell-value',
     #                      type='number',
@@ -108,7 +107,8 @@ def gen_datatable(json_data):
 
             filter_action='native',
             sort_action='native',
-            page_size=10,
+            # TODO: does not work with paginated tables
+            # page_size=10,
         ),
     ]
 
@@ -119,6 +119,7 @@ def gen_datatable(json_data):
     State('tbl', 'data')
 )
 def update_input_default(cell, data):
+    """Updates the default value for the user input"""
     if cell:
         col = cell['column_id']
         row = cell['row']
@@ -133,6 +134,7 @@ def update_input_default(cell, data):
     Input('tbl', 'active_cell'),
 )
 def update_active_cell_store(cell):
+    """Stores the active cell dictionary so available to other components"""
     if cell:
         return cell
 
@@ -143,6 +145,7 @@ def update_active_cell_store(cell):
     State('tbl', 'data')
 )
 def active_cell_status(cell, data) -> str:
+    """Banner reporting which cell was selected"""
     if not cell:
         return 'No cell selected!'
 
@@ -162,6 +165,10 @@ def active_cell_status(cell, data) -> str:
                State('tbl-active-cell', 'data')
                ])
 def update_value(n_clicks, new_value, data, cell):
+    """
+    writes the data back to the original data source
+    this in turn then triggers the data table to reload
+    """
     global DATA_SOURCE
 
     if cell:
@@ -181,42 +188,15 @@ def update_value(n_clicks, new_value, data, cell):
 @app.callback(Output('signal', 'data'),
               Input('interval-data', 'n_intervals'))
 def update_data_from_source(n_intervals):
+    """
+    stores the data in a dcc.Store
+    runs on load and will be triggered each time the table is updated or the REFRESH_INTERVAL elapses
+    """
     global DATA_SOURCE
     global COLS
     df_orig = read_data(DATA_SOURCE)
     df = wrangle_data(df_orig, COLS)
     return df.to_dict('records')
-
-
-# @app.callback(
-#     Output('tbl', 'data'),
-#     Input('tbl', 'data_timestamp'),
-#     [State('tbl', 'data'),
-#      ])
-# def update_table(timestamp, data):
-#     df = read_data(DATA_SOURCE)
-#     df = wrangle_data(df, COLS)
-#     return df
-
-
-# @app.callback(
-#     # Output('tbl', 'data'),
-#     Input('active-cell-value', 'value'),
-#     [State('tbl', 'data'), State('tbl', 'active_cell')])
-# def update_work_reported(new_value, data, cell):
-#     # if cell is None or new_value is None:
-#     #     return data
-
-#     col = cell['column_id']
-#     row = cell['row']
-#     old_val = data[row][col]  # uses data to get value
-
-#     # if old_val == new_value:
-#     #     return data
-#     # else:
-#     data[row]['wim_r'] = new_value
-#     write_data(data, DATA_SOURCE)
-#     return data
 
 
 if __name__ == "__main__":
