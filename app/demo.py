@@ -1,14 +1,19 @@
 from collections import OrderedDict
 from pathlib import Path
 from datetime import datetime
+import json
 
 import pandas as pd
 import numpy as np
+
+import plotly.graph_objects as go
 
 import dash
 from dash import Dash, Input, Output, State, html, dcc
 from dash import dash_table as dt
 import dash_bootstrap_components as dbc
+
+from data_mx import read_data, wrangle_data, write_data
 
 SERVER_HOST = '0.0.0.0'
 SERVER_PORT = 8051
@@ -31,25 +36,25 @@ COLS = OrderedDict({
 })
 
 
-# Read in the data
-df = pd.read_json(DATA_SOURCE)
-
-# Prep and wrangle
-df['admission_dt'] = pd.to_datetime(
-    df['admission_dt'], infer_datetime_format=True)
-df['admission_dt'] = df['admission_dt'].dt.strftime("%H:%M %d %b %Y")
-df = df[COLS.keys()]
-df.sort_values(by='bed_code', inplace=True)
 
 
+df = read_data(DATA_SOURCE)
 columns = [{"name": i, "id": i} for i in df.columns if i in COLS.keys()]
-for column in columns:
-    column['name'] = COLS[column['id']]
-    if column['id'] == 'admission_dt':
-        column['type'] = 'datetime'
 
 
-app = dash.Dash(external_stylesheets=[dbc.themes.BOOTSTRAP])
+df = wrangle_data(df, COLS)
+
+# TODO: this needs to be created on the fly from the data table not from the df
+fig = go.Figure(data=go.Scatterpolar(
+    r=df.wim_1.to_list(),
+    theta=df.admission_age_years.to_list(),
+    mode='markers',
+))
+
+app = dash.Dash(
+    external_stylesheets=[dbc.themes.BOOTSTRAP]
+    )
+
 
 app.layout = dbc.Container([
     dbc.Alert('Wow! A data table in the browser'),
@@ -79,40 +84,43 @@ app.layout = dbc.Container([
                dcc.Input(id='active-cell-value',
                          type='number',
                          debounce=False)],
-              color='warning'),
-    dbc.Alert(html.Plaintext(id='store-text'), color='info'),
+              color='info'),
 
+    dcc.Graph(id='fig1', figure=fig),
 
 ])
 
 
-# @app.callback(
-#     Output[])
-# def active_cell_update_value():
-#     #
-# @app.callback(
-#     Output('store-text', 'children'),
-#     Input('signal', 'data')
-# )
-# def display_store(s):
-#     return str(s)
-
 @app.callback(
     Output('tbl', 'data'),
+    Input('tbl', 'data_timestamp'),
+    [State('tbl', 'data'),
+     ])
+def update_table(timestamp, data):
+    df = read_data(DATA_SOURCE)
+    df = wrangle_data(df, COLS)
+    return df
+
+
+
+@app.callback(
+    # Output('tbl', 'data'),
     Input('active-cell-value', 'value'),
     [State('tbl', 'data'), State('tbl', 'active_cell')])
 def update_work_reported(new_value, data, cell):
+    # if cell is None or new_value is None:
+    #     return data
 
     col = cell['column_id']
     row = cell['row']
     old_val = data[row][col]  # uses data to get value
 
-    if old_val == new_value or new_value is None:
-        return data
-    else:
-        data[row]['wim_r'] = new_value
-        return data
-
+    # if old_val == new_value:
+    #     return data
+    # else:
+    data[row]['wim_r'] = new_value
+    write_data(data, DATA_SOURCE)
+    return data
 
 
 @app.callback(
@@ -122,7 +130,7 @@ def update_work_reported(new_value, data, cell):
 )
 def active_cell_status(cell, data):
     if not cell:
-        return 'No cell has been selected'
+        return None
 
     col = cell['column_id']
     row = cell['row']
