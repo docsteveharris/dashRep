@@ -18,6 +18,8 @@ from data_mx import read_data, wrangle_data, write_data, prep_cols_for_table
 SERVER_HOST = '0.0.0.0'
 SERVER_PORT = 8051
 
+REFRESH_INTERVAL = 1 * 1000  # milliseconds
+
 DATA_SOURCE = Path('../data/icu.json')
 COLS = OrderedDict({
     'ward_code': 'Ward',
@@ -34,6 +36,7 @@ COLS = OrderedDict({
     'wim_1': 'Work Intensity',
     'wim_r': 'Work Reported',
 })
+COL_NAMES = [{"name": v, "id": k} for k, v in COLS.items()]
 
 
 # # TODO: this needs to be created on the fly from the data table not from the df
@@ -52,7 +55,7 @@ app.layout = dbc.Container([
     dbc.Alert('Wow! A data table in the browser'),
     dbc.Label('Click a cell in the table to watch it turn red!!'),
 
-    dcc.Interval(id='interval_data', interval=60 * 60 * 1000, n_intervals=0),
+    dcc.Interval(id='interval_data', interval=REFRESH_INTERVAL, n_intervals=0),
     html.Div(id='datatable'),
 
     # dbc.Alert(['Update work reported? ',
@@ -63,21 +66,33 @@ app.layout = dbc.Container([
 
     # dcc.Graph(id='fig1', figure=fig),
 
+    # use this to signal when the data changes
+    dcc.Store(id='signal')
+
 ])
 
 
-@app.callback(Output('datatable', 'children'),
+# TODO n_intervals arg is unused but just ensures that store data updates
+@app.callback(Output('signal', 'data'),
               Input('interval_data', 'n_intervals'))
-def gen_datatable(df):
+def update_data_from_source(n_intervals):
     global DATA_SOURCE
     global COLS
     df_orig = read_data(DATA_SOURCE)
     df = wrangle_data(df_orig, COLS)
+    return df.to_dict('records')
+
+
+@app.callback(Output('datatable', 'children'),
+              [Input('signal', 'data')]
+              )
+def gen_datatable(json_data):
+    global COL_NAMES
     return [
         dt.DataTable(
             id='tbl',
-            columns=prep_cols_for_table(df, COLS),
-            data=df.to_dict('records'),
+            columns=COL_NAMES,
+            data=json_data,
 
             editable=False,
 
