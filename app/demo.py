@@ -18,7 +18,7 @@ from data_mx import read_data, wrangle_data, write_data, prep_cols_for_table
 SERVER_HOST = '0.0.0.0'
 SERVER_PORT = 8051
 
-REFRESH_INTERVAL = 1 * 1000  # milliseconds
+REFRESH_INTERVAL = 60 * 1000  # milliseconds
 
 DATA_SOURCE = Path('../data/icu.json')
 COLS = OrderedDict({
@@ -55,9 +55,16 @@ app.layout = dbc.Container([
     dbc.Alert('Wow! A data table in the browser'),
     dbc.Label('Click a cell in the table to watch it turn red!!'),
 
-    dcc.Interval(id='interval_data', interval=REFRESH_INTERVAL, n_intervals=0),
+    dcc.Interval(id='interval-data', interval=REFRESH_INTERVAL, n_intervals=0),
     html.Div(id='datatable'),
 
+    dbc.Alert(
+        html.Div([
+            dcc.Input(id='new-value',
+                      type='number'),
+            html.Button(id='submit-button', n_clicks=0, children='Submit')
+        ]),
+        color='info'),
     # dbc.Alert(['Update work reported? ',
     #            dcc.Input(id='active-cell-value',
     #                      type='number',
@@ -72,9 +79,23 @@ app.layout = dbc.Container([
 ])
 
 
+@app.callback(Output('interval-data', 'n_intervals'),  # reset the interval timer?
+              Input('submit-button', 'n_clicks'),
+              [State('new-value', 'value'),
+               State('signal', 'data')])
+def update_value(n_clicks, new_value, data):
+    global DATA_SOURCE
+    if n_clicks > 0:
+        df = pd.DataFrame.from_records(data)
+        # print(df.head(1))
+        df['wim_r'] = new_value
+        write_data(df, DATA_SOURCE)
+    return 0
+
+
 # TODO n_intervals arg is unused but just ensures that store data updates
 @app.callback(Output('signal', 'data'),
-              Input('interval_data', 'n_intervals'))
+              Input('interval-data', 'n_intervals'))
 def update_data_from_source(n_intervals):
     global DATA_SOURCE
     global COLS

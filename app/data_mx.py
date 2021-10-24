@@ -4,6 +4,7 @@ Factored out here to make the flow of the code in the app easier to follow
 """
 import pandas as pd
 import numpy as np
+import json
 
 
 def prep_cols_for_table(df, cols):
@@ -44,7 +45,6 @@ def wrangle_data(df, cols):
     return df
 
 
-def write_data(data, file_or_url):
-    with file_or_url.open('w') as f:
-        json.dump(data, f, indent=4)
+def write_data(df: pd.DataFrame, file_or_url: str):
+    df.to_json(file_or_url, orient='records', indent=4)
     return True
