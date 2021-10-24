@@ -49,6 +49,7 @@ COL_NAMES = [{"name": v, "id": k} for k, v in COLS.items()]
 app = dash.Dash(
     external_stylesheets=[dbc.themes.BOOTSTRAP]
 )
+app.config.suppress_callback_exceptions = True
 
 
 app.layout = dbc.Container([
@@ -65,6 +66,8 @@ app.layout = dbc.Container([
             html.Button(id='submit-button', n_clicks=0, children='Submit')
         ]),
         color='info'),
+
+    dbc.Alert(id='active-cell-value'),
     # dbc.Alert(['Update work reported? ',
     #            dcc.Input(id='active-cell-value',
     #                      type='number',
@@ -74,34 +77,11 @@ app.layout = dbc.Container([
     # dcc.Graph(id='fig1', figure=fig),
 
     # use this to signal when the data changes
-    dcc.Store(id='signal')
+    dcc.Store(id='signal'),
+
+    dcc.Store(id='tbl-active-cell')
 
 ])
-
-
-@app.callback(Output('interval-data', 'n_intervals'),  # reset the interval timer?
-              Input('submit-button', 'n_clicks'),
-              [State('new-value', 'value'),
-               State('signal', 'data')])
-def update_value(n_clicks, new_value, data):
-    global DATA_SOURCE
-    if n_clicks > 0:
-        df = pd.DataFrame.from_records(data)
-        # print(df.head(1))
-        df['wim_r'] = new_value
-        write_data(df, DATA_SOURCE)
-    return 0
-
-
-# TODO n_intervals arg is unused but just ensures that store data updates
-@app.callback(Output('signal', 'data'),
-              Input('interval-data', 'n_intervals'))
-def update_data_from_source(n_intervals):
-    global DATA_SOURCE
-    global COLS
-    df_orig = read_data(DATA_SOURCE)
-    df = wrangle_data(df_orig, COLS)
-    return df.to_dict('records')
 
 
 @app.callback(Output('datatable', 'children'),
@@ -133,6 +113,81 @@ def gen_datatable(json_data):
     ]
 
 
+@app.callback(
+    Output('new-value', 'value'),
+    Input('tbl', 'active_cell'),
+    State('tbl', 'data')
+)
+def update_input_default(cell, data):
+    if cell:
+        col = cell['column_id']
+        row = cell['row']
+        val = data[row][col]  # uses data to get value
+    else:
+        val = None
+    return val
+
+
+@app.callback(
+    Output('tbl-active-cell', 'data'),
+    Input('tbl', 'active_cell'),
+)
+def update_active_cell_store(cell):
+    if cell:
+        return cell
+
+
+@app.callback(
+    Output('active-cell-value', 'children'),
+    Input('tbl-active-cell', 'data'),
+    State('tbl', 'data')
+)
+def active_cell_status(cell, data) -> str:
+    if not cell:
+        return 'No cell selected!'
+
+    col = cell['column_id']
+    row = cell['row']
+    val = data[row][col]  # uses data to get value
+
+    msg = f"Cell ({cell['row']},{cell['column']}) with the value {val} has been selected"
+
+    return msg
+
+
+@app.callback(Output('interval-data', 'n_intervals'),  # reset the interval timer?
+              [Input('submit-button', 'n_clicks')],
+              [State('new-value', 'value'),
+               State('signal', 'data'),
+               State('tbl-active-cell', 'data')
+               ])
+def update_value(n_clicks, new_value, data, cell):
+    global DATA_SOURCE
+
+    if cell:
+        col = cell['column_id']
+        row = cell['row']
+        val = data[row][col]  # uses data to get value
+
+    if n_clicks > 0:
+        df = pd.DataFrame.from_records(data)
+
+        df.loc[row, 'wim_r'] = new_value
+        write_data(df, DATA_SOURCE)
+    return 0
+
+
+# TODO n_intervals arg is unused but just ensures that store data updates
+@app.callback(Output('signal', 'data'),
+              Input('interval-data', 'n_intervals'))
+def update_data_from_source(n_intervals):
+    global DATA_SOURCE
+    global COLS
+    df_orig = read_data(DATA_SOURCE)
+    df = wrangle_data(df_orig, COLS)
+    return df.to_dict('records')
+
+
 # @app.callback(
 #     Output('tbl', 'data'),
 #     Input('tbl', 'data_timestamp'),
@@ -162,24 +217,6 @@ def gen_datatable(json_data):
 #     data[row]['wim_r'] = new_value
 #     write_data(data, DATA_SOURCE)
 #     return data
-
-
-# @app.callback(
-#     Output('active-cell-value', 'value'),
-#     Input('tbl', 'active_cell'),
-#     State('tbl', 'data')
-# )
-# def active_cell_status(cell, data):
-#     if not cell:
-#         return None
-
-#     col = cell['column_id']
-#     row = cell['row']
-#     val = data[row][col]  # uses data to get value
-
-#     # msg = f"Cell ({cell['row']},{cell['column']}) with the value {val} has been selected"
-
-#     return val
 
 
 if __name__ == "__main__":
