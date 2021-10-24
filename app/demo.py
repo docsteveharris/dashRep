@@ -10,6 +10,9 @@ from dash import Dash, Input, Output, State, html, dcc
 from dash import dash_table as dt
 import dash_bootstrap_components as dbc
 
+SERVER_HOST = '0.0.0.0'
+SERVER_PORT = 8051
+
 DATA_SOURCE = Path('../data/icu.json')
 COLS = OrderedDict({
     'ward_code': 'Ward',
@@ -131,4 +134,8 @@ def active_cell_status(cell, data):
 
 
 if __name__ == "__main__":
-    app.run_server(debug=True)
+    app.run_server(
+        port=SERVER_PORT,
+        host=SERVER_HOST,
+        debug=True
+        )
