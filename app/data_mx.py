@@ -6,6 +6,12 @@ import pandas as pd
 import numpy as np
 
 
+def prep_cols_for_table(df, cols):
+    list_of_cols = [{"name": i, "id": i}
+                    for i in df.columns if i in cols.keys()]
+    return list_of_cols
+
+
 def read_data(file_or_url: str) -> pd.DataFrame:
     """
     Reads a data.
