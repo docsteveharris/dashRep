@@ -1,3 +1,5 @@
+# TODO: reading from API is slow, need a loading method, and think about cache?
+
 from collections import OrderedDict
 from pathlib import Path
 from datetime import datetime
@@ -15,18 +17,18 @@ import dash_bootstrap_components as dbc
 
 import data_mx as dmx
 
-HYLODE_DATA_SOURCE = '../data/icu.json'
-USER_DATA_SOURCE = '../data/user_edits.csv'
+DEV_HYLODE = False
+# HYLODE_DATA_SOURCE = Path('../data/icu.json')
+HYLODE_DATA_SOURCE = 'http://uclvlddpragae08:5006/icu/live/T06/ui'
 
-DEV_HYLODE = True
 DEV_USER = True
+USER_DATA_SOURCE = '../data/user_edits.csv'
 
 SERVER_HOST = '0.0.0.0'
 SERVER_PORT = 8009
 
 REFRESH_INTERVAL = 60 * 1000  # milliseconds
 
-HYLODE_DATA_SOURCE = Path('../data/icu.json')
 COLS = OrderedDict({
     'ward_code': 'Ward',
     'bed_code': 'Bed',

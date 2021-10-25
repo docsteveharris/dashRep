@@ -7,10 +7,6 @@ import numpy as np
 import json
 import requests
 
-# TODO: split read data into two: one for the main data, one for a user update store
-# key the second store on the bed code since there's no PID in that
-# TODO: merge the two on bed code in the wrangle step (ignore modified info for now)
-# TODO: update the write function to write to the separate 'file' store
 
 def prep_cols_for_table(df, cols):
     list_of_cols = [{"name": i, "id": i}
