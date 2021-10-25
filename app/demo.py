@@ -16,7 +16,7 @@ import dash_bootstrap_components as dbc
 from data_mx import read_data, wrangle_data, write_data, prep_cols_for_table
 
 SERVER_HOST = '0.0.0.0'
-SERVER_PORT = 8051
+SERVER_PORT = 8009
 
 REFRESH_INTERVAL = 60 * 1000  # milliseconds
 
@@ -53,12 +53,9 @@ app.config.suppress_callback_exceptions = True
 
 
 app.layout = dbc.Container([
+    html.P("""Click a cell in the table to watch it turn red!!"""),
+    html.P("""Then update the selected value in the box below and it will be saved as 'Work Reported'"""),
     dbc.Alert(id='active-cell-value'),
-    dbc.Label('Click a cell in the table to watch it turn red!!'),
-
-    dcc.Interval(id='interval-data', interval=REFRESH_INTERVAL, n_intervals=0),
-    html.Div(id='datatable'),
-
     dbc.Alert(
         html.Div([
             dcc.Input(id='new-value',
@@ -74,7 +71,10 @@ app.layout = dbc.Container([
     #           color='info'),
 
     # dcc.Graph(id='fig1', figure=fig),
+    
+    html.Div(id='datatable'),
 
+    dcc.Interval(id='interval-data', interval=REFRESH_INTERVAL, n_intervals=0),
     # use this to signal when the data changes
     dcc.Store(id='signal'),
 
