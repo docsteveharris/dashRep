@@ -1,10 +1,11 @@
 # run this script from the datascience desktop to deidentify sample data
 # secrets is excluded from git etc
 # expects a single json file from the icu/live API
-# e.g 
+# e.g
 # curl -X 'GET' \
 #   'http://uclvlddpragae08:5006/icu/live/T03/ui' \
 #   -H 'accept: application/json'
+
 
 import json
 from pathlib import Path
@@ -35,7 +36,8 @@ for person in persons:
             person[k] = replacement
         elif k == 'dob':
             replacement = fake.date_of_birth()
-            person['admission_age_years'] = date.today().year - replacement.year
+            person['admission_age_years'] = date.today().year - \
+                replacement.year
             replacement = replacement.strftime("%Y-%m-%d")
             person[k] = replacement
         elif k == 'csn':
@@ -47,9 +49,9 @@ for person in persons:
         else:
             continue
         print(f"original: {v}   replacement: {replacement}")
-    # Empty value for user input
-    person['wim_r'] = None
 
+# TODO Assert that change the content of the supplied JSON sampe but does NOT
+# change the structure
 
 with Path('../data/icu.json').open('w') as f:
     json.dump(persons, f, indent=4)
