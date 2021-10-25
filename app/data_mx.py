@@ -74,5 +74,28 @@ def wrangle_data(df, cols):
 
 
 def write_data(df: pd.DataFrame, file_or_url: str):
-    df.to_json(file_or_url, orient='records', indent=4)
+    """
+    :df: dataframe from app, should be single row
+    :file_or_url: target dataframe as csv
+    """
+    cols = ['ward_code', 'bed_code', 'wim_r']
+
+    bed = df['bed_code']
+    ward = df['ward_code']
+    wim_r = df['wim_r']
+
+    # first read from existing source df origin (dfo)
+    dfo = pd.read_csv(file_or_url)
+    # now filter by new data 
+    matching_row = dfo.index[(dfo['ward_code'] == ward) & (dfo['bed_code'] == bed)].to_list()
+    # then check if key in source
+    # if key then replace
+    if len(matching_row) == 1:
+        res = dfo.copy()
+        res.loc[matching_row, 'wim_r'] = wim_r
+    else:
+        # else append
+        res = dfo.append(df[cols])
+
+    res[cols].to_csv(file_or_url, index=False)
     return True

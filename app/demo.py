@@ -186,7 +186,8 @@ def update_value(n_clicks, new_value, data, cell):
         df = pd.DataFrame.from_records(data)
 
         df.loc[row, 'wim_r'] = new_value
-        dmx.write_data(df, HYLODE_DATA_SOURCE)
+        df_filtered_by_row = df.loc[row]
+        dmx.write_data(df_filtered_by_row, USER_DATA_SOURCE)
     return 0
 
 
