@@ -13,14 +13,20 @@ from dash import Dash, Input, Output, State, html, dcc
 from dash import dash_table as dt
 import dash_bootstrap_components as dbc
 
-from data_mx import read_data, wrangle_data, write_data, prep_cols_for_table
+import data_mx as dmx
+
+HYLODE_DATA_SOURCE = '../data/icu.json'
+USER_DATA_SOURCE = '../data/user_edits.csv'
+
+DEV_HYLODE = True
+DEV_USER = True
 
 SERVER_HOST = '0.0.0.0'
 SERVER_PORT = 8009
 
 REFRESH_INTERVAL = 60 * 1000  # milliseconds
 
-DATA_SOURCE = Path('../data/icu.json')
+HYLODE_DATA_SOURCE = Path('../data/icu.json')
 COLS = OrderedDict({
     'ward_code': 'Ward',
     'bed_code': 'Bed',
@@ -169,7 +175,7 @@ def update_value(n_clicks, new_value, data, cell):
     writes the data back to the original data source
     this in turn then triggers the data table to reload
     """
-    global DATA_SOURCE
+    global HYLODE_DATA_SOURCE
 
     if cell:
         col = cell['column_id']
@@ -180,7 +186,7 @@ def update_value(n_clicks, new_value, data, cell):
         df = pd.DataFrame.from_records(data)
 
         df.loc[row, 'wim_r'] = new_value
-        write_data(df, DATA_SOURCE)
+        dmx.write_data(df, HYLODE_DATA_SOURCE)
     return 0
 
 
@@ -192,10 +198,12 @@ def update_data_from_source(n_intervals):
     stores the data in a dcc.Store
     runs on load and will be triggered each time the table is updated or the REFRESH_INTERVAL elapses
     """
-    global DATA_SOURCE
+    global HYLODE_DATA_SOURCE
     global COLS
-    df_orig = read_data(DATA_SOURCE)
-    df = wrangle_data(df_orig, COLS)
+    df_hylode = dmx.get_hylode_data(HYLODE_DATA_SOURCE, dev=DEV_HYLODE)
+    df_user = dmx.get_user_data(USER_DATA_SOURCE, dev=DEV_USER)
+    df_orig = dmx.merge_hylode_user_data(df_hylode, df_user)
+    df = dmx.wrangle_data(df_orig, COLS)
     return df.to_dict('records')
 
 

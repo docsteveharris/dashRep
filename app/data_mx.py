@@ -5,7 +5,12 @@ Factored out here to make the flow of the code in the app easier to follow
 import pandas as pd
 import numpy as np
 import json
+import requests
 
+# TODO: split read data into two: one for the main data, one for a user update store
+# key the second store on the bed code since there's no PID in that
+# TODO: merge the two on bed code in the wrangle step (ignore modified info for now)
+# TODO: update the write function to write to the separate 'file' store
 
 def prep_cols_for_table(df, cols):
     list_of_cols = [{"name": i, "id": i}
@@ -13,19 +18,42 @@ def prep_cols_for_table(df, cols):
     return list_of_cols
 
 
-def read_data(file_or_url: str) -> pd.DataFrame:
+def get_hylode_data(file_or_url: str, dev: bool =False) -> pd.DataFrame:
     """
     Reads a data.
 
     :param      file_or_url:  The file or url
     :type       file_or_url:  any valid string path is acceptable
+    :param      dev:    if True works on a file else uses requests and the API
 
     :returns:   pandas dataframe
     :rtype:     pandas dataframe
     """
+    if not dev:
+        r = requests.get(file_or_url)
+        assert r.status_code==200
+        df = pd.DataFrame.from_dict(r.json()['data'])
+    else:
+        df = pd.read_json(file_or_url)
+    return df
 
-    # Read in the data
-    return pd.read_json(file_or_url)
+
+def get_user_data(file_or_url: str, dev: bool=False) -> pd.DataFrame:
+    """
+    Get's user data; stored for now locally as CSV
+    :returns:   pandas dataframe with three cols ward,bed,wim_r
+    """
+    if dev:
+        df=pd.read_csv(file_or_url)
+        return df
+    else:
+        raise NotImplementedError
+
+def merge_hylode_user_data(df_hylode, df_user) -> pd.DataFrame:
+    """
+    """
+    res = df_hylode.merge(df_user, how='left', on=['ward_code', 'bed_code'])
+    return res
 
 
 def wrangle_data(df, cols):
