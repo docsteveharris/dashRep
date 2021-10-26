@@ -19,7 +19,9 @@ import data_mx as dmx
 
 DEV_HYLODE = False
 # HYLODE_DATA_SOURCE = Path('../data/icu.json')
-HYLODE_DATA_SOURCE = 'http://uclvlddpragae08:5006/icu/live/T06/ui'
+# HYLODE_DATA_SOURCE = 'http://uclvlddpragae08:5006/icu/live/T06/ui'
+# Use the IP address b/c slow on DNS resolution
+HYLODE_DATA_SOURCE = 'http://172.16.149.205:5006/icu/live/T03/ui'
 
 DEV_USER = True
 USER_DATA_SOURCE = '../data/user_edits.csv'
@@ -27,7 +29,10 @@ USER_DATA_SOURCE = '../data/user_edits.csv'
 SERVER_HOST = '0.0.0.0'
 SERVER_PORT = 8009
 
-REFRESH_INTERVAL = 60 * 1000  # milliseconds
+# Checks for remote updates on the server
+# TODO: feels like we need to run as a check that looks for an update time stamp but does not update the table
+# until the server data changes
+REFRESH_INTERVAL = 5 * 60 * 1000  # milliseconds
 
 COLS = OrderedDict({
     'ward_code': 'Ward',
@@ -143,6 +148,9 @@ def update_input_default(cell, data):
 )
 def update_active_cell_store(cell):
     """Stores the active cell dictionary so available to other components"""
+    # TODO: active cell refers to the displayed data; need to know the row of the underlying source
+    # else you get the wrong reference when data is paginated or filtered
+    # prob need to provide a row_id key
     if cell:
         return cell
 
