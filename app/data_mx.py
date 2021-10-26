@@ -55,17 +55,28 @@ def merge_hylode_user_data(df_hylode, df_user) -> pd.DataFrame:
 def wrangle_data(df, cols):
     # TODO: refactor this as it does more than one thing
     # Prep and wrangle
+
+    # sort out dates
     df['admission_dt'] = pd.to_datetime(
         df['admission_dt'], infer_datetime_format=True)
     df['admission_dt'] = df['admission_dt'].dt.strftime("%H:%M %d %b %Y")
-    df = df[cols.keys()]
-    df.sort_values(by='bed_code', inplace=True)
 
-    columns = [{"name": i, "id": i} for i in df.columns if i in cols.keys()]
-    for column in columns:
-        column['name'] = cols[column['id']]
-        if column['id'] == 'admission_dt':
-            column['type'] = 'datetime'
+    # convert LoS to days
+    # df['elapsed_los_td'] = pd.to_numeric(df['elapsed_los_td'], errors='coerce')
+    df['elapsed_los_td'] = df['elapsed_los_td'] / (60 * 60 * 24)
+    df = df.round({'elapsed_los_td': 2})
+
+    # extract bed number from bed_code
+    dt = df['bed_code'].str.split('-', expand=True)
+    dt.columns = ['bay', 'bed']
+    df = pd.concat([df, dt], axis=1)
+
+    df.sort_values(by=['bed'], inplace=True)
+    # drop unused cols
+    keep_cols = [i for i in df.columns.to_list() if i in cols.keys()]
+    keep_cols.sort(key = lambda x: list(cols.keys()).index(x))
+    df = df[keep_cols]
+
     return df
 
 

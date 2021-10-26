@@ -17,11 +17,12 @@ import dash_bootstrap_components as dbc
 
 import data_mx as dmx
 
-DEV_HYLODE = False
-# HYLODE_DATA_SOURCE = Path('../data/icu.json')
+# TODO: switch to picking these config settings up from the environment
+DEV_HYLODE = True
+HYLODE_DATA_SOURCE = Path('../data/icu.json')
 # HYLODE_DATA_SOURCE = 'http://uclvlddpragae08:5006/icu/live/T06/ui'
 # Use the IP address b/c slow on DNS resolution
-HYLODE_DATA_SOURCE = 'http://172.16.149.205:5006/icu/live/T03/ui'
+# HYLODE_DATA_SOURCE = 'http://172.16.149.205:5006/icu/live/T03/ui'
 
 DEV_USER = True
 USER_DATA_SOURCE = '../data/user_edits.csv'
@@ -37,8 +38,11 @@ REFRESH_INTERVAL = 5 * 60 * 1000  # milliseconds
 COLS = OrderedDict({
     'ward_code': 'Ward',
     'bed_code': 'Bed',
+    'bay': 'Bay',
+    'bed': 'Bed',
 
     'admission_dt': 'Admission',
+    'elapsed_los_td': 'LoS',
 
     'mrn': 'MRN',
     'name': 'Full Name',
@@ -51,13 +55,6 @@ COLS = OrderedDict({
 })
 COL_NAMES = [{"name": v, "id": k} for k, v in COLS.items()]
 
-
-# # TODO: this needs to be created on the fly from the data table not from the df
-# fig = go.Figure(data=go.Scatterpolar(
-#     r=df.wim_1.to_list(),
-#     theta=df.admission_age_years.to_list(),
-#     mode='markers',
-# ))
 
 app = dash.Dash(
     external_stylesheets=[dbc.themes.BOOTSTRAP]
@@ -77,14 +74,13 @@ app.layout = dbc.Container([
         ]),
         color='info'),
 
-    # dbc.Alert(['Update work reported? ',
-    #            dcc.Input(id='active-cell-value',
-    #                      type='number',
-    #                      debounce=False)],
-    #           color='info'),
+    dcc.Graph(id='fig-polar',
+              config={
+              # 'responsive': True,
+              # 'autosizable': True,
+              },
+              ),
 
-    # dcc.Graph(id='fig1', figure=fig),
-    
     html.Div(id='datatable'),
 
     dcc.Interval(id='interval-data', interval=REFRESH_INTERVAL, n_intervals=0),
@@ -124,6 +120,30 @@ def gen_datatable(json_data):
             # page_size=10,
         ),
     ]
+
+
+@app.callback(Output('fig-polar', 'figure'),
+              Input('signal', 'data'))
+def draw_fig_polar(data):
+    """
+    Draws a fig polar.
+
+    :param      'data':  The data
+    :type       'data':  { type_description }
+    """
+    df = pd.DataFrame.from_records(data)
+
+    fig = go.Figure()
+    fig.add_trace(go.Barpolar(
+        theta=df['bed'],
+        r=np.log(df['elapsed_los_td']+1),
+        marker_color=df[['wim_1', 'wim_r']].max(axis=1),
+        # mode='markers',
+        hovertemplate="LoS: %{r} Bed: %{theta}"
+    ))
+    fig.update_layout(showlegend=False)
+    # fig.update_traces(hovertemplate="LoS: %{r} Bed: %{theta}")
+    return fig
 
 
 @app.callback(
