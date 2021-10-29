@@ -18,11 +18,11 @@ import dash_bootstrap_components as dbc
 import data_mx as dmx
 
 # TODO: switch to picking these config settings up from the environment
-DEV_HYLODE = True
+DEV_HYLODE = False
 HYLODE_DATA_SOURCE = Path('../data/icu.json')
 # HYLODE_DATA_SOURCE = 'http://uclvlddpragae08:5006/icu/live/T06/ui'
 # Use the IP address b/c slow on DNS resolution
-# HYLODE_DATA_SOURCE = 'http://172.16.149.205:5006/icu/live/T03/ui'
+HYLODE_DATA_SOURCE = 'http://172.16.149.205:5006/icu/live/T03/ui'
 
 DEV_USER = True
 USER_DATA_SOURCE = '../data/user_edits.csv'
@@ -63,7 +63,8 @@ app.config.suppress_callback_exceptions = True
 
 
 app.layout = dbc.Container([
-    html.P("""Click a cell in the table to watch it turn red!!"""),
+    html.P("""Plot below is for T3 beds; radius is the 'work intensity', and colour is the elapased LoS!"""),
+    html.P("""Click a cell in the table (either WIM or WIM reported), this will populate the edit box, edit the number as you wish, and then save; it will save only to the WIM reported field"""),
     html.P("""Then update the selected value in the box below and it will be saved as 'Work Reported'"""),
     dbc.Alert(id='active-cell-value'),
     dbc.Alert(
@@ -136,10 +137,10 @@ def draw_fig_polar(data):
     fig = go.Figure()
     fig.add_trace(go.Barpolar(
         theta=df['bed'],
-        r=np.log(df['elapsed_los_td']+1),
-        marker_color=df[['wim_1', 'wim_r']].max(axis=1),
+        marker_color=np.log(df['elapsed_los_td']+1),
+        r=df[['wim_1', 'wim_r']].max(axis=1),
         # mode='markers',
-        hovertemplate="LoS: %{r} Bed: %{theta}"
+        hovertemplate="WIM: %{r} Bed: %{theta}"
     ))
     fig.update_layout(showlegend=False)
     # fig.update_traces(hovertemplate="LoS: %{r} Bed: %{theta}")
