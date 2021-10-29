@@ -1,9 +1,9 @@
-# TODO: reading from API is slow, need a loading method, and think about cache?
-
+import os
+import json
+from dotenv import load_dotenv
 from collections import OrderedDict
 from pathlib import Path
 from datetime import datetime
-import json
 
 import pandas as pd
 import numpy as np
@@ -17,15 +17,21 @@ import dash_bootstrap_components as dbc
 
 import data_mx as dmx
 
-# TODO: switch to picking these config settings up from the environment
-DEV_HYLODE = False
-HYLODE_DATA_SOURCE = Path('../data/icu.json')
-# HYLODE_DATA_SOURCE = 'http://uclvlddpragae08:5006/icu/live/T06/ui'
-# Use the IP address b/c slow on DNS resolution
-HYLODE_DATA_SOURCE = 'http://172.16.149.205:5006/icu/live/T03/ui'
+dotenv_path=Path('../.env')
+load_dotenv(dotenv_path=dotenv_path)
 
-DEV_USER = True
-USER_DATA_SOURCE = '../data/user_edits.csv'
+if os.getenv('DEVELOPMENT'):
+    DEV_HYLODE = True
+    HYLODE_DATA_SOURCE = Path('../data/icu.json')
+    DEV_USER = True
+    USER_DATA_SOURCE = '../data/user_edits.csv'
+else:
+    # Use the IP address b/c slow on DNS resolution
+    # HYLODE_DATA_SOURCE = 'http://uclvlddpragae08:5006/icu/live/T06/ui'
+    HYLODE_DATA_SOURCE = 'http://172.16.149.205:5006/icu/live/T03/ui'
+
+    DEV_USER = True
+    USER_DATA_SOURCE = '../data/user_edits.csv'
 
 SERVER_HOST = '0.0.0.0'
 SERVER_PORT = 8009
