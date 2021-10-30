@@ -20,7 +20,7 @@ import data_mx as dmx
 dotenv_path = Path(".env")  # runs from project root
 load_dotenv(dotenv_path=dotenv_path)
 
-if os.getenv("DEVELOPMENT"):
+if os.getenv("DEVELOPMENT") == 'True':
     DEV_HYLODE = True
     HYLODE_DATA_SOURCE = Path("data/icu.json")
     DEV_USER = True
@@ -28,8 +28,8 @@ if os.getenv("DEVELOPMENT"):
 else:
     # Use the IP address b/c slow on DNS resolution
     # HYLODE_DATA_SOURCE = 'http://uclvlddpragae08:5006/icu/live/T06/ui'
+    DEV_HYLODE = False
     HYLODE_DATA_SOURCE = "http://172.16.149.205:5006/icu/live/T03/ui"
-
     DEV_USER = True
     USER_DATA_SOURCE = Path("data/user_edits.csv")
 
@@ -102,7 +102,7 @@ def layout_new_value():
                         [
                             dbc.Label('Click a WIM cell to update'),
                             dbc.Input(id="new-value", type="number", min=0, max=10),
-                            dbc.FormText('Type into the box above'),
+                            # dbc.FormText('Type into the box above'),
                             dbc.Button( id="submit-button", n_clicks=0, children="Submit"),
                         ]
                     ),
@@ -136,6 +136,7 @@ app.layout = dbc.Container(
                 ])
             ]
         ),
+        dbc.Alert(id="active-cell-value"),
         html.Br(),
         dbc.Row(
             [
@@ -144,7 +145,6 @@ app.layout = dbc.Container(
         ),
         html.Br(),
         # dbc.Alert(layout_new_value(), color="info"),
-        dbc.Alert(id="active-cell-value"),
         dcc.Interval(id="interval-data", interval=REFRESH_INTERVAL, n_intervals=0),
         # use this to signal when the data changes
         dcc.Store(id="signal"),
