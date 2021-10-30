@@ -17,7 +17,7 @@ import dash_bootstrap_components as dbc
 
 import data_mx as dmx
 
-dotenv_path=Path('.env')  # runs from project root
+dotenv_path = Path('.env')  # runs from project root
 load_dotenv(dotenv_path=dotenv_path)
 
 if os.getenv('DEVELOPMENT'):
@@ -43,11 +43,11 @@ REFRESH_INTERVAL = 5 * 60 * 1000  # milliseconds
 
 COLS = OrderedDict({
     'ward_code': 'Ward',
-    'bed_code': 'Bed',
+    # 'bed_code': 'Bed code',
     'bay': 'Bay',
     'bed': 'Bed',
 
-    'admission_dt': 'Admission',
+    # 'admission_dt': 'Admission',
     'elapsed_los_td': 'LoS',
 
     'mrn': 'MRN',
@@ -63,32 +63,42 @@ COL_NAMES = [{"name": v, "id": k} for k, v in COLS.items()]
 
 
 app = dash.Dash(
-    external_stylesheets=[dbc.themes.BOOTSTRAP]
+    external_stylesheets=[dbc.themes.FLATLY,
+                          dbc.icons.FONT_AWESOME]  # or BOOTSTRAP or SOLAR
 )
 app.config.suppress_callback_exceptions = True
 
 
 app.layout = dbc.Container([
-    html.P("""Plot below is for T3 beds; radius is the 'work intensity', and colour is the elapased LoS!"""),
-    html.P("""Click a cell in the table (either WIM or WIM reported), this will populate the edit box, edit the number as you wish, and then save; it will save only to the WIM reported field"""),
-    html.P("""Then update the selected value in the box below and it will be saved as 'Work Reported'"""),
+    # html.P("""Plot below is for T3 beds; radius is the 'work intensity', and colour is the elapased LoS!"""),
+    # html.P("""Click a cell in the table (either WIM or WIM reported), this will populate the edit box, edit the number as you wish, and then save; it will save only to the WIM reported field"""),
+    # html.P("""Then update the selected value in the box below and it will be saved as 'Work Reported'"""),
     dbc.Alert(id='active-cell-value'),
     dbc.Alert(
         html.Div([
             dcc.Input(id='new-value',
                       type='number'),
-            html.Button(id='submit-button', n_clicks=0, children='Submit')
+            html.Button(id='submit-button',
+                        n_clicks=0, children='Submit')
         ]),
         color='info'),
 
-    dcc.Graph(id='fig-polar',
-              config={
-              # 'responsive': True,
-              # 'autosizable': True,
-              },
-              ),
+    dbc.Row([
+        dbc.Col(
+            dcc.Graph(id='fig-polar',
+                    # style={'width': '500px'},
+                      config={
+                          'responsive': True,
+                          'autosizable': True,
+                      },
+                      ),
+            # md=6
+            ),
+        dbc.Col(
+            html.Div(id='datatable'), md=6
+        )
+    ]),
 
-    html.Div(id='datatable'),
 
     dcc.Interval(id='interval-data', interval=REFRESH_INTERVAL, n_intervals=0),
     # use this to signal when the data changes
@@ -112,7 +122,10 @@ def gen_datatable(json_data):
 
             editable=False,
 
-            style_cell={'padding': '5px'},
+            style_cell = {
+                'fontSize': 14,
+                # 'font-family':'sans-serif',
+                'padding': '3px'},
             style_cell_conditional=[
                 {
                     'if': {'column_id': 'name'},
@@ -143,12 +156,14 @@ def draw_fig_polar(data):
     fig = go.Figure()
     fig.add_trace(go.Barpolar(
         theta=df['bed'],
-        marker_color=np.log(df['elapsed_los_td']+1),
+        marker_color=np.log(df['elapsed_los_td'] + 1),
         r=df[['wim_1', 'wim_r']].max(axis=1),
         # mode='markers',
         hovertemplate="WIM: %{r} Bed: %{theta}"
     ))
     fig.update_layout(showlegend=False)
+    fig.update_layout(margin=dict(t=20, b=20,l=20,r=20))
+    fig.update_layout(autosize=True)
     # fig.update_traces(hovertemplate="LoS: %{r} Bed: %{theta}")
     return fig
 
