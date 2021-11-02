@@ -1,2 +1,2 @@
 # Rename this file to .env and update the variables as necessary
-DEVELOPMENT=True
+ENV=DEVELOPMENT
