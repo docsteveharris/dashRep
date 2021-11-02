@@ -44,7 +44,7 @@ REFRESH_INTERVAL = 5 * 60 * 1000  # milliseconds
 COLS = OrderedDict(
     {
         "ward_code": "Ward",
-        # 'bed_code': 'Bed code',
+        'bed_code': 'Bed code',
         "bay": "Bay",
         "bed": "Bed",
         # 'admission_dt': 'Admission',
