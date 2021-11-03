@@ -44,10 +44,17 @@ class Config:
             "wim_r": "WIM-R",
         }
     )
+
+    COLS_FULL = ['bay', 'bed', 'name', 'mrn', 'admission_age_years', 'sex', 'wim_1']
+    # COLS_FULL = {i:COLS[i] for i in COLS_FULL}
+
+    COLS_SIDEBAR = ['bay', 'bed', 'name']
+    # COLS_SIDEBAR = {i:COLS[i] for i in COLS_SIDEBAR}
+
     COL_NAMES = [{"name": v, "id": k} for k, v in COLS.items()]
 
 
-class Production():
+class Production(Config):
     # Use the IP address b/c slow on DNS resolution
     # HYLODE_DATA_SOURCE = 'http://uclvlddpragae08:5006/icu/live/T06/ui'
     DEV_HYLODE = False
@@ -56,7 +63,7 @@ class Production():
     USER_DATA_SOURCE = Path("data/user_edits.csv")
 
 
-class Development():
+class Development(Config):
     DEV_HYLODE = True
     HYLODE_DATA_SOURCE = Path("data/icu.json")
 

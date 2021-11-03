@@ -8,7 +8,8 @@ import plotly.graph_objects as go
 import pandas as pd
 import numpy as np
 
-from config import Config
+from config import ConfigFactory
+conf = ConfigFactory.factory()
 
 
 def layout_text_card():

@@ -1,10 +1,11 @@
 from dash import Input, Output, html, dcc
 
 from app import app
-from config import Config
-from layouts import sitrep, hello
+from config import ConfigFactory
+from layouts import sitrep
 import callbacks
 
+conf = ConfigFactory.factory()
 
 app.layout = html.Div([
     dcc.Location(id='url', refresh=False),
@@ -23,5 +24,5 @@ def display_page(pathname):
 
 
 if __name__ == "__main__":
-    app.run_server(port=Config.SERVER_PORT,
-                   host=Config.SERVER_HOST, debug=True)
+    app.run_server(port=conf.SERVER_PORT,
+                   host=conf.SERVER_HOST, debug=True)
