@@ -22,7 +22,7 @@ main = html.Div(
         dbc.Col(html.P('Here is the polar plot'), md=9),
         dbc.Col([
             html.P('Here is patient list'),
-            html.Div(id="datatable"),
+            html.Div(id="datatable-side"),
             html.P('End of table')
         ], md=3),
     ])

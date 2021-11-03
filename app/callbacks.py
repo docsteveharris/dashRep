@@ -12,8 +12,8 @@ from config import ConfigFactory
 conf = ConfigFactory.factory()
 import wrangle as wng
 
-@app.callback(Output("datatable", "children"), [Input("signal", "data")])
-def gen_datatable(json_data):
+@app.callback(Output("datatable-side", "children"), [Input("signal", "data")])
+def gen_datatable_side(json_data):
     COL_NAMES = [{"name": v, "id": k} for k, v in conf.COLS.items() if k in conf.COLS_SIDEBAR]
     return [
         dt.DataTable(
@@ -21,15 +21,27 @@ def gen_datatable(json_data):
             columns=COL_NAMES,
             data=json_data,
             editable=False,
+            style_as_list_view=True,  # remove col lines
             style_cell={
                 "fontSize": 12,
                 # 'font-family':'sans-serif',
-                "padding": "2px",
+                "padding": "3px",
             },
-            style_cell_conditional=[{"if": {"column_id": "name"}, "textAlign": "left"}],
-            style_table={"overflowX": "auto"},
+            style_cell_conditional=[
+                {"if": {"column_id": "bay"}, "textAlign": "right"},
+                {"if": {"column_id": "bed"}, "textAlign": "left"},
+                {"if": {"column_id": "name"}, "textAlign": "left"},
+                {"if": {"column_id": "name"}, "fontWeight": "bolder"},
+            ],
+            style_data={ 'color': 'black', 'backgroundColor': 'white' },
+            style_data_conditional=[
+                {'if': {'row_index': 'odd'}, 'backgroundColor': 'rgb(220, 220, 220)'}
+            ],
+            # style_table={"overflowX": "auto"},
             # filter_action="native",
             sort_action="native",
+            cell_selectable=False,
+            row_selectable='single',
             # TODO: does not work with paginated tables
             # page_size=10,
         ),
