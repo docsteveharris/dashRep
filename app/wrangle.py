@@ -80,6 +80,18 @@ def wrangle_data(df, cols):
     return df
 
 
+def select_cols(df: pd.DataFrame, keep_cols: list):
+    """
+    Returns a filtered (by cols) version of the dataframe
+    
+    :param      df:         a dataframe
+    :param      keep_cols:  a list of column names
+    
+    :returns:   a filtered (selected) dataframe
+    """
+    return df[keep_cols]
+
+
 def write_data(df: pd.DataFrame, file_or_url: str):
     """
     :df: dataframe from app, should be single row

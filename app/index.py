@@ -17,8 +17,6 @@ app.layout = html.Div([
 def display_page(pathname):
     if pathname == '/sitrep':
         return sitrep
-    elif pathname == '/hello':
-        return hello
     else:
         return '404'
 
