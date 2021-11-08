@@ -12,9 +12,11 @@ from config import ConfigFactory
 conf = ConfigFactory.factory()
 import wrangle as wng
 
+
 @app.callback(Output("datatable-side", "children"), [Input("signal", "data")])
 def gen_datatable_side(json_data):
-    COL_NAMES = [{"name": v, "id": k} for k, v in conf.COLS.items() if k in conf.COLS_SIDEBAR]
+    COL_NAMES = [{"name": v, "id": k}
+                 for k, v in conf.COLS.items() if k in conf.COLS_SIDEBAR]
     return [
         dt.DataTable(
             id="tbl",
@@ -33,46 +35,91 @@ def gen_datatable_side(json_data):
                 {"if": {"column_id": "name"}, "textAlign": "left"},
                 {"if": {"column_id": "name"}, "fontWeight": "bolder"},
             ],
-            style_data={ 'color': 'black', 'backgroundColor': 'white' },
+            style_data={'color': 'black', 'backgroundColor': 'white'},
             style_data_conditional=[
-                {'if': {'row_index': 'odd'}, 'backgroundColor': 'rgb(220, 220, 220)'}
+                {'if': {'row_index': 'odd'},
+                    'backgroundColor': 'rgb(220, 220, 220)'}
             ],
             # style_table={"overflowX": "auto"},
             # filter_action="native",
             sort_action="native",
             cell_selectable=False,
             row_selectable='single',
+            selected_row_ids=[],
+            selected_rows=[],
             # TODO: does not work with paginated tables
             # page_size=10,
         ),
     ]
 
 
-# @app.callback(Output("fig-polar", "figure"), Input("signal", "data"))
-# def draw_fig_polar(data):
-#     """
-#     Draws a fig polar.
+# @app.callback(
+#     Output('tbl-active-row', 'data'),
+#     Input('datatable-side', 'selected_rows'))
+# def get_datatable_side_selected_row(row_id):
+#     """returns the row id selected from the datatable (side bar)"""
+#     print(row_id)
+#     if row_id:
+#         return row_id
 
-#     :param      'data':  The data
-#     :type       'data':  { type_description }
-#     """
-#     df = pd.DataFrame.from_records(data)
 
-#     fig = go.Figure()
-#     fig.add_trace(
-#         go.Barpolar(
-#             theta=df["bed"],
-#             marker_color=np.log(df["elapsed_los_td"] + 1),
-#             r=df[["wim_1", "wim_r"]].max(axis=1),
-#             # mode='markers',
-#             hovertemplate="WIM: %{r} Bed: %{theta}",
-#         )
-#     )
-#     fig.update_layout(showlegend=False)
-#     fig.update_layout(margin=dict(t=20, b=20, l=20, r=20))
-#     fig.update_layout(autosize=True)
-#     # fig.update_traces(hovertemplate="LoS: %{r} Bed: %{theta}")
-#     return fig
+@app.callback(
+    Output('msg', 'children'),
+    Input('datatable-side', 'row_index'))
+def gen_msg(i):
+    print(i)
+    i = str(i)
+    s = f"The active row id is {i} I hope"
+    return s
+
+
+@app.callback(
+    Output("polar-main", "figure"),
+    Input("signal", "data")
+)
+def draw_fig_polar(data):
+    """
+    Draws a fig polar.
+
+    :param      'data':  The data
+    :type       'data':  { type_description }
+    """
+    df = pd.DataFrame.from_records(data)
+
+    fig = go.Figure()
+    fig.add_trace(
+        go.Barpolar(
+            name='',  # names the 'trace'
+            theta=df["bed"],
+            # log x+1 to avoid negative numbers
+            marker_color=np.log(df["elapsed_los_td"] + 1),
+            r=df[["wim_1", "wim_r"]].max(axis=1),
+            # mode='markers',
+            hovertemplate="WIM: %{r} Bed: %{theta}",
+        )
+    )
+
+    # update polar plot
+    fig.update_polars(bgcolor='#FFF')
+    fig.update_polars(hole=0.1)
+    fig.update_polars(sector=[0, 350])
+
+    fig.update_polars(angularaxis_showgrid=True)
+    fig.update_polars(angularaxis_gridcolor='#EEE')
+    fig.update_polars(angularaxis_linecolor='#222')  # outer ring
+    fig.update_polars(angularaxis_ticks='outside')
+    fig.update_polars(angularaxis_direction='counterclockwise')
+
+    fig.update_polars(radialaxis_showgrid=True)
+    fig.update_polars(radialaxis_color='#999')
+    fig.update_polars(radialaxis_gridcolor='#EEE')
+
+    fig.update_layout(margin=dict(t=20, b=20, l=20, r=20))
+
+    # update traces
+    fig.update_traces(opacity=0.5)
+    fig.update_traces(hovertemplate="LoS: %{r} Bed: %{theta}")
+    return fig
 
 
 # @app.callback(
@@ -159,7 +206,8 @@ def update_data_from_source(n_intervals):
     stores the data in a dcc.Store
     runs on load and will be triggered each time the table is updated or the REFRESH_INTERVAL elapses
     """
-    df_hylode = wng.get_hylode_data(conf.HYLODE_DATA_SOURCE, dev=conf.DEV_HYLODE)
+    df_hylode = wng.get_hylode_data(
+        conf.HYLODE_DATA_SOURCE, dev=conf.DEV_HYLODE)
     df_user = wng.get_user_data(conf.USER_DATA_SOURCE, dev=conf.DEV_USER)
     df_orig = wng.merge_hylode_user_data(df_hylode, df_user)
     df = wng.wrangle_data(df_orig, conf.COLS)

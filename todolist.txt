@@ -1,0 +1,12 @@
+ ✔ TODO: create an empty 'shell layout' @done (21-11-07 21:52)
+ ✔ TODO: create a simple table of names @done (21-11-07 21:52)
+ ✔ TODO: create a polar plot from the data @done (21-11-07 23:21)
+ ☐ TODO: use the polar plot to filter the detailed tabl
+   stuck: can't get the selected row to be picked up
+   try this https://stackoverflow.com/a/61829468/992999 ?
+ ☐ TODO: create a skeleton structure for each ward to permit 'blanks'
+ ☐ TODO: break down bed list into functional units: will require some structure to beds 
+   e.g. North/South/PACU
+   then you be able to filter by these units
+   will need to instantiate a database for this
+   ?sqlite for portability
