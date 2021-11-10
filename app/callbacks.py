@@ -65,12 +65,11 @@ def gen_datatable_side(json_data):
 
 @app.callback(
     Output('msg', 'children'),
-    Input('datatable-side', 'row_index'))
-def gen_msg(i):
-    print(i)
-    i = str(i)
-    s = f"The active row id is {i} I hope"
-    return s
+    Input('tbl', 'derived_virtual_selected_rows'))
+def gen_msg(derived_virtual_selected_rows):
+    row_id = 'NOT IMPLEMENTED'
+    row = str(derived_virtual_selected_rows) if derived_virtual_selected_rows else "MISSING"
+    return f"Row is {row} and Row ID is {row_id}" if row or row_id else "Click the table"
 
 
 @app.callback(

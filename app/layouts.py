@@ -45,8 +45,9 @@ footer = html.Div(
     dbc.Row([
         dbc.Col(
             html.Div([
-                html.P(id='msg'),
-                html.P("Here is some detailed note held in the footer")
+                dbc.Alert(id='msg')
+                # html.P(id='msg'),
+                # html.P("Here is some detailed note held in the footer")
             ]), md=12),
     ])
 )
