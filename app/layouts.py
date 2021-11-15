@@ -1,12 +1,14 @@
-import dash
+"""
+Layouts organised for sitrep
+- header
+- main
+- footer
+- dash_only (to store non visible parts of the app)
+"""
+
 from dash import Dash, Input, Output, State, html, dcc
 from dash import dash_table as dt
 import dash_bootstrap_components as dbc
-
-import plotly.graph_objects as go
-
-import pandas as pd
-import numpy as np
 
 from config import ConfigFactory
 conf = ConfigFactory.factory()
@@ -28,6 +30,7 @@ main = html.Div(
                 config={
                     'responsive': True,
                     'autosizable': True,
+                    'displaylogo': False,
                 }
             )),
             html.P('Here is the polar plot')

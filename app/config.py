@@ -1,3 +1,14 @@
+"""
+Load configurations using a base config class design pattern
+as per https://stackoverflow.com/a/64500887/992999
+and the following in the file where the config is needed
+
+```
+conf = ConfigFactory.factory()
+```
+
+"""
+
 from os import environ
 from pathlib import Path
 from dotenv import load_dotenv, find_dotenv
@@ -7,7 +18,6 @@ from collections import OrderedDict
 dotenv_path = Path(__file__).parent.parent.resolve() / '.env'
 load_dotenv(dotenv_path=dotenv_path)
 
-# as per https://stackoverflow.com/a/64500887/992999
 class ConfigFactory(object):
     def factory():
         env = environ.get('ENV', 'DEVELOPMENT') 

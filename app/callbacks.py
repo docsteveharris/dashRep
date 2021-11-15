@@ -1,3 +1,6 @@
+"""
+Functions (callbacks) that provide the functionality
+"""
 from app import app
 from dash import Dash, Input, Output, State, html, dcc
 from dash import dash_table as dt
@@ -65,47 +68,69 @@ def gen_datatable_side(json_data):
 
 @app.callback(
     Output('msg', 'children'),
-    Input('tbl', 'derived_virtual_selected_rows'))
-def gen_msg(derived_virtual_selected_rows):
+    [
+        Input('polar-main', 'clickData'),
+        Input('tbl', 'derived_virtual_selected_rows'),
+    ]
+)
+def gen_msg(polar_click, derived_virtual_selected_rows):
     row_id = 'NOT IMPLEMENTED'
     row = str(derived_virtual_selected_rows) if derived_virtual_selected_rows else "MISSING"
-    return f"Row is {row} and Row ID is {row_id}" if row or row_id else "Click the table"
+    row_text = f"Row is {row} and Row ID is {row_id}" if row or row_id else "Click the table"
+    # if not polar_click:
+    #     polar_click = "No point clicked"
+    return f"""{row_text}"""
+    # return f"""{row_text} AND {polar_click}"""
 
 
 @app.callback(
     Output("polar-main", "figure"),
-    Input("signal", "data")
+    [
+        Input("signal", "data"),
+        Input("polar-main", "clickData"),
+    ]
 )
-def draw_fig_polar(data):
+def draw_fig_polar(data, selection):
     """
     Draws a fig polar.
 
     :param      'data':  The data
     :type       'data':  { type_description }
     """
+    print(selection)
     df = pd.DataFrame.from_records(data)
 
     fig = go.Figure()
     fig.add_trace(
-        go.Barpolar(
+        # go.Barpolar(
+        go.Scatterpolar(
             name='',  # names the 'trace'
             theta=df["bed"],
             # log x+1 to avoid negative numbers
-            marker_color=np.log(df["elapsed_los_td"] + 1),
+            marker_color=np.log(df["elapsed_los_td"]),
             r=df[["wim_1", "wim_r"]].max(axis=1),
-            # mode='markers',
+            mode='markers+text',
+            text=df["bed"],
             hovertemplate="WIM: %{r} Bed: %{theta}",
         )
     )
 
+    # fig.update_traces(textposition='top left')
+    fig.update_traces(marker_line_color='rgba(0,0,0,1)')
+    fig.update_traces(marker_opacity=0.5)
+    fig.update_traces(selected_marker_opacity=0.5)
+    # fig.update_traces(marker_line_width=)
+    fig.update_traces(marker_size=20)
+    # fig.update_traces(name='Predicted ward LoS')
+
     # update polar plot
     fig.update_polars(bgcolor='#FFF')
-    fig.update_polars(hole=0.1)
-    fig.update_polars(sector=[0, 350])
+    fig.update_polars(hole=0.6)
+    # fig.update_polars(sector=[0, 350])
 
     fig.update_polars(angularaxis_showgrid=True)
     fig.update_polars(angularaxis_gridcolor='#EEE')
-    fig.update_polars(angularaxis_linecolor='#222')  # outer ring
+    fig.update_polars(angularaxis_linecolor='grey')  # outer ring
     fig.update_polars(angularaxis_ticks='outside')
     fig.update_polars(angularaxis_direction='counterclockwise')
 
@@ -116,8 +141,9 @@ def draw_fig_polar(data):
     fig.update_layout(margin=dict(t=20, b=20, l=20, r=20))
 
     # update traces
-    fig.update_traces(opacity=0.5)
+    # fig.update_traces(opacity=0.5)
     fig.update_traces(hovertemplate="LoS: %{r} Bed: %{theta}")
+
     return fig
 
 
