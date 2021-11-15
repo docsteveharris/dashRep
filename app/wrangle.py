@@ -75,7 +75,16 @@ def wrangle_data(df, cols):
     # drop unused cols
     keep_cols = [i for i in df.columns.to_list() if i in cols.keys()]
     keep_cols.sort(key = lambda x: list(cols.keys()).index(x))
+
+    # https://dash.plotly.com/datatable/interactivity
+    # be careful that 'id' is not actually the name of a row
+    # use this to track rows in the app
+    if 'bed_code' not in keep_cols:
+        keep_cols[0:0] = ['bed_code']
     df = df[keep_cols]
+    df['id'] = df['bed_code']
+    df.set_index('id', inplace=True)
+    print(df.head())
 
     return df
 
