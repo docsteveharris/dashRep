@@ -1,6 +1,7 @@
 """
 Functions (callbacks) that provide the functionality
 """
+import json
 from app import app
 from dash import Dash, Input, Output, State, html, dcc
 from dash import dash_table as dt
@@ -22,7 +23,7 @@ def gen_datatable_side(json_data):
                  for k, v in conf.COLS.items() if k in conf.COLS_SIDEBAR]
     return [
         dt.DataTable(
-            id="tbl",
+            id="tbl-side",
             columns=COL_NAMES,
             data=json_data,
             editable=False,
@@ -65,22 +66,36 @@ def gen_datatable_side(json_data):
 #     if row_id:
 #         return row_id
 
+# @app.callback(
+#     Output('click-data', 'children'),
+#     Input('polar-main', 'clickData'))
+# def display_click_data(clickData):
+#     return json.dumps(clickData, indent=2)
+
 
 @app.callback(
     Output('msg', 'children'),
     [
         Input('polar-main', 'clickData'),
-        Input('tbl', 'derived_virtual_selected_rows'),
+        Input('tbl-side', 'derived_virtual_selected_rows'),
     ]
 )
 def gen_msg(polar_click, derived_virtual_selected_rows):
     row_id = 'NOT IMPLEMENTED'
-    row = str(derived_virtual_selected_rows) if derived_virtual_selected_rows else "MISSING"
-    row_text = f"Row is {row} and Row ID is {row_id}" if row or row_id else "Click the table"
-    # if not polar_click:
-    #     polar_click = "No point clicked"
-    return f"""{row_text}"""
-    # return f"""{row_text} AND {polar_click}"""
+    row = (str(derived_virtual_selected_rows)
+           if derived_virtual_selected_rows else "MISSING")
+    row_text = (f"Row is {row} and Row ID is {row_id}"
+                if row or row_id else "Click the table")
+    if not polar_click:
+        polar_txt = "No point clicked"
+    else:
+        pDict = polar_click['points'][0]
+        pIndex = pDict['pointIndex']
+        pText = pDict['text']
+        polar_txt = f"You clicked point {pIndex} with the label {pText}"
+
+    return f"""{row_text}
+    AND {polar_txt}"""
 
 
 @app.callback(
@@ -145,6 +160,7 @@ def draw_fig_polar(data, selection):
     fig.update_traces(hovertemplate="LoS: %{r} Bed: %{theta}")
 
     return fig
+
 
 
 # @app.callback(
