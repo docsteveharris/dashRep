@@ -57,14 +57,14 @@ def gen_datatable_side(json_data):
     ]
 
 
-# @app.callback(
-#     Output('tbl-active-row', 'data'),
-#     Input('datatable-side', 'selected_rows'))
-# def get_datatable_side_selected_row(row_id):
-#     """returns the row id selected from the datatable (side bar)"""
-#     print(row_id)
-#     if row_id:
-#         return row_id
+@app.callback(
+    Output('tbl-active-row', 'data'),
+    Input('tbl-side', 'derived_virtual_selected_rows'))
+def get_datatable_side_selected_row(row_id):
+    """returns the row id selected from the datatable (side bar)"""
+    # print(row_id)
+    if row_id:
+        return row_id
 
 # @app.callback(
 #     Output('click-data', 'children'),
@@ -77,7 +77,7 @@ def gen_datatable_side(json_data):
     Output('msg', 'children'),
     [
         Input('polar-main', 'clickData'),
-        Input('tbl-side', 'derived_virtual_selected_rows'),
+        Input('tbl-active-row', 'data'),
     ]
 )
 def gen_msg(polar_click, derived_virtual_selected_rows):
