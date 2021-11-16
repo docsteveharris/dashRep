@@ -63,6 +63,7 @@ dash_only = html.Div([
     # use this to signal when the data changes
     dcc.Store(id="signal"),
     dcc.Store(id="tbl-active-row"),
+    dcc.Store(id="tbl-active-row-id"),
 ])
 
 # """Principal layout for sitrep2 page"""

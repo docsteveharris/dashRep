@@ -62,8 +62,8 @@ def gen_datatable_side(json_data, polar_click):
             sort_action="native",
             cell_selectable=False,
             row_selectable='single',
-            selected_row_ids=[],
-            selected_rows=pSelectIndex,
+            selected_row_ids=['SR02-02'],
+            # selected_rows=pSelectIndex,
             # TODO: does not work with paginated tables
             # page_size=10,
         ),
@@ -130,6 +130,7 @@ def draw_fig_polar(data, selection):
     fig.update_traces(hovertemplate="LoS: %{r} Bed: %{theta}")
 
     if selection:
+        print(selection)
         pSelectIndex = [selection['points'][0]['pointIndex']]
         print(pSelectIndex)
         fig.update_traces(selectedpoints=pSelectIndex,
@@ -145,13 +146,13 @@ def draw_fig_polar(data, selection):
     Output('msg', 'children'),
     [
         Input('tbl-active-row', 'data'),
+        Input('tbl-active-row-id', 'data'),
         Input('polar-main', 'clickData'),
     ]
 )
-def gen_msg(active_row, polar_click):
-    row_id = 'NOT IMPLEMENTED'
-    row = (str(active_row)
-           if active_row else "MISSING")
+def gen_msg(active_row, active_row_id, polar_click):
+    row = (str(active_row) if active_row else "MISSING")
+    row_id = (str(active_row_id) if active_row_id else "MISSING")
     row_text = (f"Row is {row} and Row ID is {row_id}"
                 if row or row_id else "Click the table")
     if not polar_click:
@@ -166,10 +167,20 @@ def gen_msg(active_row, polar_click):
 
 
 @app.callback(
+    Output('tbl-active-row-id', 'data'),
+    Input('tbl-side', 'derived_virtual_selected_row_ids'))
+def get_datatable_side_selected_row(row_id):
+    """returns the 'row id' selected from the datatable (side bar)"""
+    print(row_id)
+    if row_id:
+        return row_id
+
+
+@app.callback(
     Output('tbl-active-row', 'data'),
     Input('tbl-side', 'derived_virtual_selected_rows'))
 def get_datatable_side_selected_row(row_id):
-    """returns the row id selected from the datatable (side bar)"""
+    """returns the 'row' selected from the datatable (side bar)"""
     print(row_id)
     if row_id:
         return row_id

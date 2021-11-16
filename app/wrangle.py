@@ -83,7 +83,7 @@ def wrangle_data(df, cols):
         keep_cols[0:0] = ['bed_code']
     df = df[keep_cols]
     df['id'] = df['bed_code']
-    df.set_index('id', inplace=True)
+    df.set_index('id', inplace=True, drop=False)
     print(df.head())
 
     return df
