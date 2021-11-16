@@ -71,47 +71,6 @@ def gen_datatable_side(json_data, polar_click):
 
 
 @app.callback(
-    Output('tbl-active-row', 'data'),
-    Input('tbl-side', 'derived_virtual_selected_rows'))
-def get_datatable_side_selected_row(row_id):
-    """returns the row id selected from the datatable (side bar)"""
-    # print(row_id)
-    if row_id:
-        return row_id
-
-# @app.callback(
-#     Output('click-data', 'children'),
-#     Input('polar-main', 'clickData'))
-# def display_click_data(clickData):
-#     return json.dumps(clickData, indent=2)
-
-
-@app.callback(
-    Output('msg', 'children'),
-    [
-        Input('tbl-active-row', 'data'),
-        Input('polar-main', 'clickData'),
-    ]
-)
-def gen_msg(active_row, polar_click):
-    row_id = 'NOT IMPLEMENTED'
-    row = (str(active_row)
-           if active_row else "MISSING")
-    row_text = (f"Row is {row} and Row ID is {row_id}"
-                if row or row_id else "Click the table")
-    if not polar_click:
-        polar_txt = "No point clicked"
-    else:
-        pDict = polar_click['points'][0]
-        pIndex = pDict['pointIndex']
-        pText = pDict['text']
-        polar_txt = f"You clicked point {pIndex} with the label {pText}"
-
-    return f"""{row_text}
-    AND {polar_txt}"""
-
-
-@app.callback(
     Output("polar-main", "figure"),
     [
         Input("signal", "data"),
@@ -182,81 +141,38 @@ def draw_fig_polar(data, selection):
     return fig
 
 
-# @app.callback(
-#     Output("new-value", "value"), Input("tbl", "active_cell"), State("tbl", "data")
-# )
-# def update_input_default(cell, data):
-#     """Updates the default value for the user input"""
-#     if cell:
-#         col = cell["column_id"]
-#         row = cell["row"]
-#         val = data[row][col]  # uses data to get value
-#     else:
-#         val = None
-#     return val
+@app.callback(
+    Output('msg', 'children'),
+    [
+        Input('tbl-active-row', 'data'),
+        Input('polar-main', 'clickData'),
+    ]
+)
+def gen_msg(active_row, polar_click):
+    row_id = 'NOT IMPLEMENTED'
+    row = (str(active_row)
+           if active_row else "MISSING")
+    row_text = (f"Row is {row} and Row ID is {row_id}"
+                if row or row_id else "Click the table")
+    if not polar_click:
+        polar_txt = "No point clicked"
+    else:
+        pDict = polar_click['points'][0]
+        pIndex = pDict['pointIndex']
+        pText = pDict['text']
+        polar_txt = f"You clicked point {pIndex} with the label {pText}"
+
+    return f"""{row_text} AND {polar_txt}"""
 
 
-# @app.callback(
-#     Output("tbl-active-cell", "data"),
-#     Input("tbl", "active_cell"),
-# )
-# def update_active_cell_store(cell):
-#     """Stores the active cell dictionary so available to other components"""
-#     # TODO: active cell refers to the displayed data; need to know the row of the underlying source
-#     # else you get the wrong reference when data is paginated or filtered
-#     # prob need to provide a row_id key
-#     if cell:
-#         return cell
-
-
-# @app.callback(
-#     Output("active-cell-value", "children"),
-#     Input("tbl-active-cell", "data"),
-#     State("tbl", "data"),
-# )
-# def active_cell_status(cell, data) -> str:
-#     """Banner reporting which cell was selected"""
-#     if not cell:
-#         return "No cell selected!"
-
-#     col = cell["column_id"]
-#     row = cell["row"]
-#     val = data[row][col]  # uses data to get value
-
-#     msg = (
-#         f"Cell ({cell['row']},{cell['column']}) with the value {val} has been selected"
-#     )
-
-#     return msg
-
-
-# @app.callback(
-#     Output("interval-data", "n_intervals"),  # reset the interval timer?
-#     [Input("submit-button", "n_clicks")],
-#     [
-#         State("new-value", "value"),
-#         State("signal", "data"),
-#         State("tbl-active-cell", "data"),
-#     ],
-# )
-# def update_value(n_clicks, new_value, data, cell):
-#     """
-#     writes the data back to the original data source
-#     this in turn then triggers the data table to reload
-#     """
-
-#     if cell:
-#         col = cell["column_id"]
-#         row = cell["row"]
-#         val = data[row][col]  # uses data to get value
-
-#     if n_clicks > 0:
-#         df = pd.DataFrame.from_records(data)
-
-#         df.loc[row, "wim_r"] = new_value
-#         df_filtered_by_row = df.loc[row]
-#         wng.write_data(df_filtered_by_row, conf.USER_DATA_SOURCE)
-#     return 0
+@app.callback(
+    Output('tbl-active-row', 'data'),
+    Input('tbl-side', 'derived_virtual_selected_rows'))
+def get_datatable_side_selected_row(row_id):
+    """returns the row id selected from the datatable (side bar)"""
+    print(row_id)
+    if row_id:
+        return row_id
 
 
 # TODO n_intervals arg is unused but just ensures that store data updates
