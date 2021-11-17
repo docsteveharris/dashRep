@@ -1,9 +1,14 @@
  ✔ TODO: create an empty 'shell layout' @done (21-11-07 21:52)
  ✔ TODO: create a simple table of names @done (21-11-07 21:52)
  ✔ TODO: create a polar plot from the data @done (21-11-07 23:21)
- ☐ TODO: use the polar plot to filter the detailed tabl
+ ✘ TODO: use the polar plot to filter the detailed tabl @cancelled (21-11-16 23:54)
    stuck: can't get the selected row to be picked up
    try this https://stackoverflow.com/a/61829468/992999 ?
+   cancel this. for now let's see the polar plot as an 'output' only
+   otherwise ends up recursively updating between plot and table
+ ☐ Use the side bar table to filter the plot and produce a detailed summary of the patient
+   ✔ move the side bar to the left so it acts like a menu @done (21-11-17 00:03)
+   ☐ add in a detailed 'card' with the rest of the info below the plot
  ☐ TODO: create a skeleton structure for each ward to permit 'blanks'
  ☐ TODO: break down bed list into functional units: will require some structure to beds 
    e.g. North/South/PACU

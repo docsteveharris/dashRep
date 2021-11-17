@@ -25,6 +25,10 @@ main = html.Div(
     dbc.Row([
         # main space
         dbc.Col([
+            # html.P('Here is patient list'),
+            html.Div(id="datatable-side"),
+        ], md=3),
+        dbc.Col([
             html.Div(dcc.Graph(
                 id='polar-main',
                 config={
@@ -35,10 +39,6 @@ main = html.Div(
             )),
             html.P('Here is the polar plot')
         ], md=9),
-        dbc.Col([
-            # html.P('Here is patient list'),
-            html.Div(id="datatable-side"),
-        ], md=3),
     ])
 )
 

@@ -21,18 +21,18 @@ import wrangle as wng
     Output("datatable-side", "children"),
     [
         Input("signal", "data"),
-        Input("polar-main", "clickData"),
+        # Input("polar-main", "clickData"),
     ]
 )
-def gen_datatable_side(json_data, polar_click):
+def gen_datatable_side(json_data):
     COL_NAMES = [{"name": v, "id": k}
                  for k, v in conf.COLS.items() if k in conf.COLS_SIDEBAR]
 
-    if polar_click:
-        pSelectIndex = [polar_click['points'][0]['pointIndex']]
-    else:
-        pSelectIndex = []
-    print(pSelectIndex)
+    # if polar_click:
+    #     pSelectIndex = [polar_click['points'][0]['pointIndex']]
+    # else:
+    #     pSelectIndex = []
+    # print(pSelectIndex)
 
     return [
         dt.DataTable(
@@ -62,7 +62,7 @@ def gen_datatable_side(json_data, polar_click):
             sort_action="native",
             cell_selectable=False,
             row_selectable='single',
-            selected_row_ids=['SR02-02'],
+            # selected_row_ids=['SR02-02'],
             # selected_rows=pSelectIndex,
             # TODO: does not work with paginated tables
             # page_size=10,
@@ -74,10 +74,10 @@ def gen_datatable_side(json_data, polar_click):
     Output("polar-main", "figure"),
     [
         Input("signal", "data"),
-        Input("polar-main", "clickData"),
+        Input("tbl-active-row", "data"),
     ]
 )
-def draw_fig_polar(data, selection):
+def draw_fig_polar(data, tbl_select):
     """
     Draws a fig polar.
 
@@ -129,11 +129,11 @@ def draw_fig_polar(data, selection):
     # fig.update_traces(opacity=0.5)
     fig.update_traces(hovertemplate="LoS: %{r} Bed: %{theta}")
 
-    if selection:
-        print(selection)
-        pSelectIndex = [selection['points'][0]['pointIndex']]
-        print(pSelectIndex)
-        fig.update_traces(selectedpoints=pSelectIndex,
+    if tbl_select:
+        print(tbl_select)
+        # pSelectIndex = [selection['points'][0]['pointIndex']]
+        # print(pSelectIndex)
+        fig.update_traces(selectedpoints=tbl_select,
                           selector=dict(type='scatterpolar'))
         fig.update_traces(selected_marker_size=50,
                           selector=dict(type='scatterpolar'))
@@ -155,23 +155,24 @@ def gen_msg(active_row, active_row_id, polar_click):
     row_id = (str(active_row_id) if active_row_id else "MISSING")
     row_text = (f"Row is {row} and Row ID is {row_id}"
                 if row or row_id else "Click the table")
-    if not polar_click:
-        polar_txt = "No point clicked"
-    else:
-        pDict = polar_click['points'][0]
-        pIndex = pDict['pointIndex']
-        pText = pDict['text']
-        polar_txt = f"You clicked point {pIndex} with the label {pText}"
+    # if not polar_click:
+    #     polar_txt = "No point clicked"
+    # else:
+    #     pDict = polar_click['points'][0]
+    #     pIndex = pDict['pointIndex']
+    #     pText = pDict['text']
+    #     polar_txt = f"You clicked point {pIndex} with the label {pText}"
 
-    return f"""{row_text} AND {polar_txt}"""
+    # return f"""{row_text} AND {polar_txt}"""
+    return f"""{row_text}"""
 
 
 @app.callback(
     Output('tbl-active-row-id', 'data'),
     Input('tbl-side', 'derived_virtual_selected_row_ids'))
-def get_datatable_side_selected_row(row_id):
+def get_datatable_side_selected_row_id(row_id):
     """returns the 'row id' selected from the datatable (side bar)"""
-    print(row_id)
+    # print(row_id)
     if row_id:
         return row_id
 
@@ -179,11 +180,11 @@ def get_datatable_side_selected_row(row_id):
 @app.callback(
     Output('tbl-active-row', 'data'),
     Input('tbl-side', 'derived_virtual_selected_rows'))
-def get_datatable_side_selected_row(row_id):
+def get_datatable_side_selected_row(row):
     """returns the 'row' selected from the datatable (side bar)"""
-    print(row_id)
-    if row_id:
-        return row_id
+    # print(row)
+    if row:
+        return row
 
 
 # TODO n_intervals arg is unused but just ensures that store data updates
