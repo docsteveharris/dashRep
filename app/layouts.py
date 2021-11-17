@@ -29,6 +29,8 @@ main = html.Div(
             html.Div(id="datatable-side"),
         ], md=3),
         dbc.Col([
+            html.H3('Your critical care unit'),
+
             html.Div(dcc.Graph(
                 id='polar-main',
                 config={
@@ -37,7 +39,13 @@ main = html.Div(
                     'displaylogo': False,
                 }
             )),
-            html.P('Here is the polar plot')
+
+            html.Br(),
+            html.Br(),
+            html.P('Here is the bottom of the polar plot occupying 3/4 of the page'),
+
+            html.Div([ dbc.Alert(id='msg') ]),
+
         ], md=9),
     ])
 )
@@ -48,9 +56,9 @@ footer = html.Div(
     dbc.Row([
         dbc.Col(
             html.Div([
-                dbc.Alert(id='msg')
+                # dbc.Alert(id='msg')
                 # html.P(id='msg'),
-                # html.P("Here is some detailed note held in the footer")
+                html.P("Here is some detailed note held in the footer")
             ]), md=12),
     ])
 )
