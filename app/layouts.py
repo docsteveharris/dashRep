@@ -21,34 +21,51 @@ header = html.Div(
 )
 
 # main page body currently split into two columns 9:3
-main = html.Div(
+main = html.Div([
+    # Full width row
     dbc.Row([
-        # main space
+            html.Div([html.H3('UCLH T03 ICU Current Patients')]),
+            ]),
+
+    dbc.Row([
+        # Heading of LEFT 3/12 COLUMN
         dbc.Col([
-            # html.P('Here is patient list'),
             html.Div(id="datatable-side"),
         ], md=3),
+
+        # Heading of RIGHT 9/12 COLUMN
         dbc.Col([
-            html.H3('Your critical care unit'),
 
-            html.Div(dcc.Graph(
-                id='polar-main',
-                config={
-                    'responsive': True,
-                    'autosizable': True,
-                    'displaylogo': False,
-                }
-            )),
+            dbc.Card([
+                dbc.CardHeader("Patient details after selcting from the side table"),
+                dbc.CardBody([
+                    html.Div(id="datatable-patient")
+                ])
+            ]),
 
-            html.Br(),
-            html.Br(),
-            html.P('Here is the bottom of the polar plot occupying 3/4 of the page'),
+            dbc.Card([
+                dbc.CardHeader("Patients displayed by bed number"),
+                dbc.CardBody([
 
-            html.Div([ dbc.Alert(id='msg') ]),
+                    # html.Div([ html.P('Patients displayed by bed number', className="card-text"), ]),
+
+                    html.Div(dcc.Graph(
+                        id='polar-main',
+                        config={
+                            'responsive': True,
+                            'autosizable': True,
+                            'displaylogo': False,
+                        }
+                    )),
+                ])
+            ]),
+
+
+
 
         ], md=9),
-    ])
-)
+    ], align='start')
+])
 
 # footer! mainly marking the end of the page
 # but perhaps put the patient detail here
@@ -56,7 +73,7 @@ footer = html.Div(
     dbc.Row([
         dbc.Col(
             html.Div([
-                # dbc.Alert(id='msg')
+                dbc.Alert(id='msg'),
                 # html.P(id='msg'),
                 html.P("Here is some detailed note held in the footer")
             ]), md=12),
@@ -70,8 +87,8 @@ dash_only = html.Div([
                  interval=conf.REFRESH_INTERVAL, n_intervals=0),
     # use this to signal when the data changes
     dcc.Store(id="signal"),
-    dcc.Store(id="tbl-active-row"),
-    dcc.Store(id="tbl-active-row-id"),
+    # dcc.Store(id="tbl-active-row"),
+    dcc.Store(id="tbl-side-selection"),
 ])
 
 # """Principal layout for sitrep2 page"""

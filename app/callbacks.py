@@ -5,34 +5,51 @@ import json
 from app import app
 from dash import Dash, Input, Output, State, html, dcc
 from dash import dash_table as dt
-# import dash_bootstrap_components as dbc
 
 import plotly.graph_objects as go
 
 import pandas as pd
 import numpy as np
 
+import wrangle as wng
 from config import ConfigFactory
 conf = ConfigFactory.factory()
-import wrangle as wng
 
 
 @app.callback(
-    Output("datatable-side", "children"),
-    [
-        Input("signal", "data"),
-        # Input("polar-main", "clickData"),
-    ]
-)
+    Output("datatable-patient", "children"),
+    [Input("tbl-side-selection", "data"), Input("signal", "data"), ])
+def gen_datatable_patient(row_id, json_data):
+    """
+    Draw the patient level data
+
+    :param      row_id:  the row selected from the side datatable
+    :param      data:        the patient data
+    """
+    # filter cols
+    COL_NAMES = [{"name": v, "id": k}
+                 for k, v in conf.COLS.items() if k in conf.COLS_FULL]
+
+    # TODO: shouldn't need to do a roundtrip through a pandas dataframe
+    # filter the json data by the selected table row
+    df = pd.DataFrame.from_records(json_data)
+    df = df[df['id'] == row_id]  # must use tbl id
+    json_data = df.to_dict("records")
+
+    return [
+        dt.DataTable(
+            id="tbl-patient",
+            columns=COL_NAMES,
+            data=json_data,
+            editable=False
+        )]
+
+
+@app.callback(Output("datatable-side", "children"),
+              [Input("signal", "data"), ])
 def gen_datatable_side(json_data):
     COL_NAMES = [{"name": v, "id": k}
                  for k, v in conf.COLS.items() if k in conf.COLS_SIDEBAR]
-
-    # if polar_click:
-    #     pSelectIndex = [polar_click['points'][0]['pointIndex']]
-    # else:
-    #     pSelectIndex = []
-    # print(pSelectIndex)
 
     return [
         dt.DataTable(
@@ -57,27 +74,16 @@ def gen_datatable_side(json_data):
                 {'if': {'row_index': 'odd'},
                     'backgroundColor': 'rgb(220, 220, 220)'}
             ],
-            # style_table={"overflowX": "auto"},
-            # filter_action="native",
             sort_action="native",
             cell_selectable=False,
             row_selectable='single',
-            # selected_row_ids=['SR02-02'],
-            # selected_rows=pSelectIndex,
-            # TODO: does not work with paginated tables
-            # page_size=10,
         ),
     ]
 
 
-@app.callback(
-    Output("polar-main", "figure"),
-    [
-        Input("signal", "data"),
-        Input("tbl-active-row", "data"),
-    ]
-)
-def draw_fig_polar(data, tbl_select):
+@app.callback(Output("polar-main", "figure"),
+              [Input("tbl-side-selection", "data"), Input("signal", "data"), ])
+def draw_fig_polar(row_id, data):
     """
     Draws a fig polar.
 
@@ -89,7 +95,6 @@ def draw_fig_polar(data, tbl_select):
 
     fig = go.Figure()
     fig.add_trace(
-        # go.Barpolar(
         go.Scatterpolar(
             name='',  # names the 'trace'
             theta=df["bed"],
@@ -102,89 +107,60 @@ def draw_fig_polar(data, tbl_select):
         )
     )
 
-    # fig.update_traces(textposition='top left')
-    fig.update_traces(marker_line_color='rgba(0,0,0,1)')
-    fig.update_traces(marker_opacity=0.8)
-    fig.update_traces(marker_size=20)
-    # fig.update_traces(name='Predicted ward LoS')
+    # update layout
+    fig.update_layout(margin=dict(t=20, b=20, l=20, r=20))
 
     # update polar plot
     fig.update_polars(bgcolor='#FFF')
     fig.update_polars(hole=0.6)
-    # fig.update_polars(sector=[0, 350])
-
     fig.update_polars(angularaxis_showgrid=True)
     fig.update_polars(angularaxis_gridcolor='#EEE')
     fig.update_polars(angularaxis_linecolor='grey')  # outer ring
     fig.update_polars(angularaxis_ticks='outside')
     fig.update_polars(angularaxis_direction='counterclockwise')
-
     fig.update_polars(radialaxis_showgrid=True)
     fig.update_polars(radialaxis_color='#999')
     fig.update_polars(radialaxis_gridcolor='#EEE')
 
-    fig.update_layout(margin=dict(t=20, b=20, l=20, r=20))
-
-    # update traces
-    # fig.update_traces(opacity=0.5)
+    fig.update_traces(marker_line_color='rgba(0,0,0,1)')
+    fig.update_traces(marker_opacity=0.8)
+    fig.update_traces(marker_size=20)
     fig.update_traces(hovertemplate="LoS: %{r} Bed: %{theta}")
 
-    if tbl_select:
-        print(tbl_select)
-        # pSelectIndex = [selection['points'][0]['pointIndex']]
-        # print(pSelectIndex)
-        fig.update_traces(selectedpoints=tbl_select,
-                          selector=dict(type='scatterpolar'))
-        fig.update_traces(selected_marker_size=50,
-                          selector=dict(type='scatterpolar'))
-        # fig.update_traces(selected_marker_opacity=1.0)
+    if row_id:
+        row_ids = []  # selected points expects a list
+        row_ids.append(row_id)
+        print(row_ids)
+        fig.update_traces(selectedpoints=row_ids, selector=dict(type='scatterpolar'))
+        fig.update_traces(selected_marker_size=50, selector=dict(type='scatterpolar'))
 
     return fig
 
 
-@app.callback(
-    Output('msg', 'children'),
-    [
-        Input('tbl-active-row', 'data'),
-        Input('tbl-active-row-id', 'data'),
-        Input('polar-main', 'clickData'),
-    ]
-)
-def gen_msg(active_row, active_row_id, polar_click):
-    row = (str(active_row) if active_row else "MISSING")
-    row_id = (str(active_row_id) if active_row_id else "MISSING")
-    row_text = (f"Row is {row} and Row ID is {row_id}"
-                if row or row_id else "Click the table")
-    # if not polar_click:
-    #     polar_txt = "No point clicked"
-    # else:
-    #     pDict = polar_click['points'][0]
-    #     pIndex = pDict['pointIndex']
-    #     pText = pDict['text']
-    #     polar_txt = f"You clicked point {pIndex} with the label {pText}"
+@app.callback(Output('msg', 'children'), [Input('tbl-side-selection', 'data'), ])
+def gen_msg(active_row):
+    if not active_row:
+        res = """Click the table"""
 
-    # return f"""{row_text} AND {polar_txt}"""
-    return f"""{row_text}"""
+    res = str(active_row)
+    res = f"Selected row id is {res}"
+    return res
 
 
-@app.callback(
-    Output('tbl-active-row-id', 'data'),
-    Input('tbl-side', 'derived_virtual_selected_row_ids'))
-def get_datatable_side_selected_row_id(row_id):
-    """returns the 'row id' selected from the datatable (side bar)"""
-    # print(row_id)
-    if row_id:
-        return row_id
-
-
-@app.callback(
-    Output('tbl-active-row', 'data'),
-    Input('tbl-side', 'derived_virtual_selected_rows'))
-def get_datatable_side_selected_row(row):
-    """returns the 'row' selected from the datatable (side bar)"""
-    # print(row)
-    if row:
-        return row
+@app.callback(Output('tbl-side-selection', 'data'),
+              Input('tbl-side', 'derived_virtual_selected_row_ids'),
+              State('signal', 'data')
+              )
+def get_datatable_side_selected_row(row_id, json_data):
+    """
+    returns the 'row_id' selected from the datatable (side bar)
+    if nothing selected then returns the first row
+    """
+    if not row_id:
+        row_id = json_data[0]['id']
+    else:
+        row_id = row_id[0]
+    return row_id
 
 
 # TODO n_intervals arg is unused but just ensures that store data updates
