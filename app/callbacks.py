@@ -128,10 +128,11 @@ def draw_fig_polar(row_id, data):
     fig.update_traces(hovertemplate="LoS: %{r} Bed: %{theta}")
 
     if row_id:
-        row_ids = []  # selected points expects a list
-        row_ids.append(row_id)
-        print(row_ids)
-        fig.update_traces(selectedpoints=row_ids, selector=dict(type='scatterpolar'))
+        dfi = df.reset_index(drop=True)
+        row_num = dfi[dfi['id'] == row_id].index[0]
+        row_nums = []
+        row_nums.append(row_num)
+        fig.update_traces(selectedpoints=row_nums, selector=dict(type='scatterpolar'))
         fig.update_traces(selected_marker_size=50, selector=dict(type='scatterpolar'))
 
     return fig
