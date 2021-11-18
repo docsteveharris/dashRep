@@ -5,6 +5,7 @@ import json
 from app import app
 from dash import Dash, Input, Output, State, html, dcc
 from dash import dash_table as dt
+import dash_daq as daq
 
 import plotly.graph_objects as go
 
@@ -139,6 +140,31 @@ def draw_fig_polar(row_id, data):
         fig.update_traces(selected_textfont_color='white', selector=dict(type='scatterpolar'))
 
     return fig
+
+
+@app.callback(Output('wim-graduated-bar', 'children'),
+              Input('signal', 'data') )
+def gen_graduated_bar(json_data, wim_max=175):
+    """
+    Generates the graduated bar summarising current work intensity
+    Assumes the max possible is ?5x the number number of beds
+    
+    :param      json_data:  json representation of the current dataframe
+    :type       json_data:  { type_description }
+    """
+    df = pd.DataFrame.from_records(json_data)
+
+    wim_sum = df[['wim_1', 'wim_r']].max(axis=1).sum()
+    wim_sum_scaled = wim_sum / wim_max * 10
+
+    res = daq.GraduatedBar(
+        color={"gradient":True,"ranges":{"green":[0,4],"yellow":[4,7],"red":[7,10]}},
+        showCurrentValue=True,
+        # vertical=True,
+        value=wim_sum_scaled
+    )
+
+    return res
 
 
 @app.callback(Output('msg', 'children'), [Input('tbl-side-selection', 'data'), ])

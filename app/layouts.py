@@ -37,7 +37,8 @@ main = html.Div([
         dbc.Col([
 
             dbc.Card([
-                dbc.CardHeader("Patient details after selcting from the side table"),
+                dbc.CardHeader(
+                    "Patient details after selcting from the side table"),
                 dbc.CardBody([
                     html.Div(id="datatable-patient")
                 ])
@@ -60,6 +61,14 @@ main = html.Div([
                 ])
             ]),
 
+            dbc.Card([
+                dbc.CardHeader("Ward level metrics"),
+                dbc.CardBody([
+                    html.H3("Work Intensity"),
+                    html.Div( id="wim-graduated-bar" ),
+                    html.P("This is an estimate based on the overall burden of organ support")
+                ])
+            ]),
 
 
 
