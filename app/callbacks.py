@@ -134,7 +134,7 @@ def draw_fig_polar(row_id, data):
         row_nums = []
         row_nums.append(row_num)
         fig.update_traces(selectedpoints=row_nums, selector=dict(type='scatterpolar'))
-        fig.update_traces(selected_marker_size=30, selector=dict(type='scatterpolar'))
+        fig.update_traces(selected_marker_size=40, selector=dict(type='scatterpolar'))
         # fig.update_traces(selected_marker_opacity=1.0, selector=dict(type='scatterpolar'))
         fig.update_traces(selected_marker_color='red', selector=dict(type='scatterpolar'))
         fig.update_traces(selected_textfont_color='white', selector=dict(type='scatterpolar'))
