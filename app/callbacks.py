@@ -123,7 +123,7 @@ def draw_fig_polar(row_id, data):
     fig.update_polars(radialaxis_gridcolor='#EEE')
 
     fig.update_traces(marker_line_color='rgba(0,0,0,1)')
-    fig.update_traces(marker_opacity=0.8)
+    # fig.update_traces(marker_opacity=0.8)
     fig.update_traces(marker_size=20)
     fig.update_traces(hovertemplate="LoS: %{r} Bed: %{theta}")
 
@@ -133,7 +133,10 @@ def draw_fig_polar(row_id, data):
         row_nums = []
         row_nums.append(row_num)
         fig.update_traces(selectedpoints=row_nums, selector=dict(type='scatterpolar'))
-        fig.update_traces(selected_marker_size=50, selector=dict(type='scatterpolar'))
+        fig.update_traces(selected_marker_size=30, selector=dict(type='scatterpolar'))
+        # fig.update_traces(selected_marker_opacity=1.0, selector=dict(type='scatterpolar'))
+        fig.update_traces(selected_marker_color='red', selector=dict(type='scatterpolar'))
+        fig.update_traces(selected_textfont_color='white', selector=dict(type='scatterpolar'))
 
     return fig
 
