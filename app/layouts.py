@@ -14,18 +14,21 @@ from config import ConfigFactory
 conf = ConfigFactory.factory()
 
 # a bright banner across the top of the page
+
+BANNER_TXT = "Sitrep v2: UCLH T03 current ICU patients",
 header = html.Div(
     dbc.Row([
-        dbc.Col(html.H1("Sitrep v2", className="bg-primary text-white p-2"), md=12),
+        dbc.Col(html.H1(BANNER_TXT,
+                        className="bg-primary text-white p-2"), md=12),
     ])
 )
 
 # main page body currently split into two columns 9:3
 main = html.Div([
-    # Full width row
-    dbc.Row([
-            html.Div([html.H3('UCLH T03 ICU Current Patients')]),
-            ]),
+    # # Full width row
+    # dbc.Row([
+    #         html.Div([html.H2('UCLH T03 ICU Current Patients')]),
+    #         ]),
 
     dbc.Row([
         # Heading of LEFT 3/12 COLUMN
@@ -36,39 +39,65 @@ main = html.Div([
         # Heading of RIGHT 9/12 COLUMN
         dbc.Col([
 
-            dbc.Card([
-                dbc.CardHeader("Ward level metrics"),
-                dbc.CardBody([
-                    html.H3("Work Intensity"),
-                    html.Div( id="wim-graduated-bar" ),
-                    html.P("This is an estimate based on the overall burden of organ support")
-                ])
+            dbc.Row([
+                html.H2('Ward level metrics', style={'textAlign': 'right'}),
+                dbc.Col([
+                    dbc.Card([
+                        dbc.CardHeader("Ward occupancy"),
+                        dbc.CardBody([
+                            html.Div(id="occ-graduated-bar"),
+                            html.P("Based on the total possible beds (not staff)")
+                        ])
+                    ]),
+                ], md=6),
+                dbc.Col([
+                    dbc.Card([
+                        dbc.CardHeader("Work Intensity"),
+                        dbc.CardBody([
+                            html.Div(id="wim-graduated-bar"),
+                            html.P(
+                                "This is an estimate based on the overall burden of organ support")
+                        ])
+                    ]),
+                ], md=6),
             ]),
 
-            dbc.Card([
-                dbc.CardHeader(
-                    "Patient details after selcting from the side table"),
-                dbc.CardBody([
-                    html.Div(id="datatable-patient")
-                ])
+
+            html.Br(),
+            dbc.Row([
+                dbc.Col([
+                    dbc.Card([
+                        dbc.CardHeader(
+                            "Patient details after selcting from the side table"),
+                        dbc.CardBody([
+                            html.Div(id="datatable-patient")
+                        ])
+                    ]),
+                ], md=12)
             ]),
 
-            dbc.Card([
-                dbc.CardHeader("Patients displayed by bed number"),
-                dbc.CardBody([
+            html.Br(),
+            dbc.Row([
+                dbc.Col([
+                    dbc.Card([
+                        dbc.CardHeader("Patients displayed by bed number"),
+                        dbc.CardBody([
 
-                    # html.Div([ html.P('Patients displayed by bed number', className="card-text"), ]),
+                            # html.Div([ html.P('Patients displayed by bed number', className="card-text"), ]),
 
-                    html.Div(dcc.Graph(
-                        id='polar-main',
-                        config={
-                            'responsive': True,
-                            'autosizable': True,
-                            'displaylogo': False,
-                        }
-                    )),
-                ])
+                            html.Div(dcc.Graph(
+                                id='polar-main',
+                                config={
+                                    'responsive': True,
+                                    'autosizable': True,
+                                    'displaylogo': False,
+                                }
+                            )),
+                        ])
+                    ]),
+                ], md=12)
             ]),
+
 
 
 

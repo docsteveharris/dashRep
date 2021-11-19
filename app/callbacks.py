@@ -133,22 +133,51 @@ def draw_fig_polar(row_id, data):
         row_num = dfi[dfi['id'] == row_id].index[0]
         row_nums = []
         row_nums.append(row_num)
-        fig.update_traces(selectedpoints=row_nums, selector=dict(type='scatterpolar'))
-        fig.update_traces(selected_marker_size=40, selector=dict(type='scatterpolar'))
+        fig.update_traces(selectedpoints=row_nums,
+                          selector=dict(type='scatterpolar'))
+        fig.update_traces(selected_marker_size=40,
+                          selector=dict(type='scatterpolar'))
         # fig.update_traces(selected_marker_opacity=1.0, selector=dict(type='scatterpolar'))
-        fig.update_traces(selected_marker_color='red', selector=dict(type='scatterpolar'))
-        fig.update_traces(selected_textfont_color='white', selector=dict(type='scatterpolar'))
+        fig.update_traces(selected_marker_color='red',
+                          selector=dict(type='scatterpolar'))
+        fig.update_traces(selected_textfont_color='white',
+                          selector=dict(type='scatterpolar'))
 
     return fig
 
 
+@app.callback(Output('occ-graduated-bar', 'children'),
+              Input('signal', 'data'))
+def gen_graduated_bar(json_data, occ_max=35):
+    """
+    Generates the graduated bar summarising current occupancy
+
+    :param      json_data:  json representation of the current dataframe
+    :type       json_data:  { type_description }
+    """
+    df = pd.DataFrame.from_records(json_data)
+
+    occ = df.shape[0]
+    occ_scaled = occ / occ_max * 10
+
+    res = daq.GraduatedBar(
+        color={"gradient": True, "ranges": {
+            "green": [0, 4], "yellow": [4, 7], "red": [7, 10]}},
+        showCurrentValue=True,
+        # vertical=True,
+        value=occ_scaled
+    )
+
+    return res
+
+
 @app.callback(Output('wim-graduated-bar', 'children'),
-              Input('signal', 'data') )
+              Input('signal', 'data'))
 def gen_graduated_bar(json_data, wim_max=175):
     """
     Generates the graduated bar summarising current work intensity
     Assumes the max possible is ?5x the number number of beds
-    
+
     :param      json_data:  json representation of the current dataframe
     :type       json_data:  { type_description }
     """
@@ -158,7 +187,8 @@ def gen_graduated_bar(json_data, wim_max=175):
     wim_sum_scaled = wim_sum / wim_max * 10
 
     res = daq.GraduatedBar(
-        color={"gradient":True,"ranges":{"green":[0,4],"yellow":[4,7],"red":[7,10]}},
+        color={"gradient": True, "ranges": {
+            "green": [0, 4], "yellow": [4, 7], "red": [7, 10]}},
         showCurrentValue=True,
         # vertical=True,
         value=wim_sum_scaled
