@@ -15,7 +15,7 @@ from faker import Faker
 
 fake = Faker()
 
-with Path('../data/secret/icu.json').open() as f:
+with Path('data/secret/icu.json').open() as f:
     persons = json.load(f)
     persons = persons['data']
 
@@ -24,6 +24,10 @@ fields_to_fake = {
     'dob': fake.date_of_birth,
     'csn': fake.numerify,
 }
+
+# Empty some beds 
+beds_to_empty = ['SR02-02', 'BY02-19', 'BY03-24']
+persons = [i for i in persons if i['bed_code'] not in beds_to_empty]
 
 for person in persons:
     for k, v in person.items():
@@ -53,5 +57,5 @@ for person in persons:
 # TODO Assert that change the content of the supplied JSON sampe but does NOT
 # change the structure
 
-with Path('../data/icu.json').open('w') as f:
+with Path('data/icu.json').open('w') as f:
     json.dump(persons, f, indent=4)

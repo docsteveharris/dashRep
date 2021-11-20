@@ -230,9 +230,14 @@ def update_data_from_source(n_intervals):
     stores the data in a dcc.Store
     runs on load and will be triggered each time the table is updated or the REFRESH_INTERVAL elapses
     """
+    print('foo')
     df_hylode = wng.get_hylode_data(
         conf.HYLODE_DATA_SOURCE, dev=conf.DEV_HYLODE)
+    print('bar')
+    print(df_hylode.head())
+    ward = df_hylode['ward_code'][0]
     df_user = wng.get_user_data(conf.USER_DATA_SOURCE, dev=conf.DEV_USER)
-    df_orig = wng.merge_hylode_user_data(df_hylode, df_user)
+    df_skeleton = wng.get_ward_skeleton(ward, conf.SKELETON_DATA_SOURCE, dev=conf.DEV)
+    df_orig = wng.merge_hylode_user_data(df_skeleton, df_hylode, df_user)
     df = wng.wrangle_data(df_orig, conf.COLS)
     return df.to_dict("records")

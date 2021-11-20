@@ -63,10 +63,12 @@ class Config:
 
     COL_NAMES = [{"name": v, "id": k} for k, v in COLS.items()]
 
+    SKELETON_DATA_SOURCE = Path("data/skeleton.csv")
 
 class Production(Config):
     # Use the IP address b/c slow on DNS resolution
     # HYLODE_DATA_SOURCE = 'http://uclvlddpragae08:5006/icu/live/T06/ui'
+    DEV = False
     DEV_HYLODE = False
     HYLODE_DATA_SOURCE = "http://172.16.149.205:5006/icu/live/T03/ui"
     DEV_USER = True
@@ -74,6 +76,7 @@ class Production(Config):
 
 
 class Development(Config):
+    DEV = True
     DEV_HYLODE = True
     HYLODE_DATA_SOURCE = Path("data/icu.json")
 

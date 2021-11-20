@@ -31,6 +31,7 @@ def get_hylode_data(file_or_url: str, dev: bool =False) -> pd.DataFrame:
         df = pd.DataFrame.from_dict(r.json()['data'])
     else:
         df = pd.read_json(file_or_url)
+        print(df.head())
     return df
 
 
@@ -45,11 +46,32 @@ def get_user_data(file_or_url: str, dev: bool=False) -> pd.DataFrame:
     else:
         raise NotImplementedError
 
-def merge_hylode_user_data(df_hylode, df_user) -> pd.DataFrame:
+def get_ward_skeleton(ward: str, file_or_url, dev: bool=False) -> pd.DataFrame:
     """
+    Gets the ward skeleton.
+    
+    :param      ward:  The ward
+    :type       ward:  str
+    
+    :returns:   The ward skeleton.
+    :rtype:     pd.DataFrame
     """
-    res = df_hylode.merge(df_user, how='left', on=['ward_code', 'bed_code'])
-    return res
+    if dev:
+        df=pd.read_csv(file_or_url)
+        return df
+    else:
+        raise NotImplementedError
+
+
+def merge_hylode_user_data(df_skeleton, df_hylode, df_user) -> pd.DataFrame:
+    """
+    Merges HYLODE data onto a skeleton for the ward
+    This allows blanks (empty) beds to be represented
+    Then merges on any user updates
+    """
+    df = df_skeleton.merge(df_hylode, how='left', on=['ward_code', 'bed_code'])
+    df = df.merge(df_user, how='left', on=['ward_code', 'bed_code'])
+    return df
 
 
 def wrangle_data(df, cols):
