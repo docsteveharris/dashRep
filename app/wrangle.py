@@ -71,6 +71,8 @@ def merge_hylode_user_data(df_skeleton, df_hylode, df_user) -> pd.DataFrame:
     """
     df = df_skeleton.merge(df_hylode, how='left', on=['ward_code', 'bed_code'])
     df = df.merge(df_user, how='left', on=['ward_code', 'bed_code'])
+    df['bed_empty'] = False
+    df.loc[df.name.isnull(), 'bed_empty'] = True 
     return df
 
 

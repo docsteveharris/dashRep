@@ -93,6 +93,9 @@ def draw_fig_polar(row_id, data):
     """
 
     df = pd.DataFrame.from_records(data)
+    # set up markers for empty beds
+    df.loc[df.bed_empty, 'elapsed_los_td'] = 1  # 1 seconds
+    df.loc[df.bed_empty, 'wim_r'] = -1  # zero work intensity
 
     fig = go.Figure()
     fig.add_trace(
@@ -113,13 +116,13 @@ def draw_fig_polar(row_id, data):
 
     # update polar plot
     fig.update_polars(bgcolor='#FFF')
-    fig.update_polars(hole=0.6)
+    fig.update_polars(hole=0.3)
     fig.update_polars(angularaxis_showgrid=True)
-    fig.update_polars(angularaxis_gridcolor='#EEE')
-    fig.update_polars(angularaxis_linecolor='grey')  # outer ring
+    fig.update_polars(angularaxis_gridcolor='#212121')
+    # fig.update_polars(angularaxis_linecolor='#212121')  # outer ring
     fig.update_polars(angularaxis_ticks='outside')
     fig.update_polars(angularaxis_direction='counterclockwise')
-    fig.update_polars(radialaxis_showgrid=True)
+    fig.update_polars(radialaxis_showgrid=False)
     fig.update_polars(radialaxis_color='#999')
     fig.update_polars(radialaxis_gridcolor='#EEE')
 
@@ -128,8 +131,9 @@ def draw_fig_polar(row_id, data):
     fig.update_traces(marker_size=20)
     fig.update_traces(hovertemplate="LoS: %{r} Bed: %{theta}")
 
+    dfi = df.reset_index(drop=True)
+
     if row_id:
-        dfi = df.reset_index(drop=True)
         row_num = dfi[dfi['id'] == row_id].index[0]
         row_nums = []
         row_nums.append(row_num)
@@ -230,11 +234,8 @@ def update_data_from_source(n_intervals):
     stores the data in a dcc.Store
     runs on load and will be triggered each time the table is updated or the REFRESH_INTERVAL elapses
     """
-    print('foo')
     df_hylode = wng.get_hylode_data(
         conf.HYLODE_DATA_SOURCE, dev=conf.DEV_HYLODE)
-    print('bar')
-    print(df_hylode.head())
     ward = df_hylode['ward_code'][0]
     df_user = wng.get_user_data(conf.USER_DATA_SOURCE, dev=conf.DEV_USER)
     df_skeleton = wng.get_ward_skeleton(ward, conf.SKELETON_DATA_SOURCE, dev=conf.DEV)

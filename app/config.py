@@ -52,6 +52,7 @@ class Config:
             # "dob": "DoB",
             "wim_1": "WIM-P",
             "wim_r": "WIM-R",
+            "bed_empty": "Empty",
         }
     )
 
