@@ -6,12 +6,26 @@
    try this https://stackoverflow.com/a/61829468/992999 ?
    cancel this. for now let's see the polar plot as an 'output' only
    otherwise ends up recursively updating between plot and table
- ☐ Use the side bar table to filter the plot and produce a detailed summary of the patient
+ ✔ Use the side bar table to filter the plot and produce a detailed summary of the patient @done (21-11-18 23:34)
    ✔ move the side bar to the left so it acts like a menu @done (21-11-17 00:03)
-   ☐ add in a detailed 'card' with the rest of the info below the plot
- ☐ TODO: create a skeleton structure for each ward to permit 'blanks'
+   ✔ add in a detailed 'card' with the rest of the info below the plot @done (21-11-18 23:34)
+ ✔ TODO: create a skeleton structure for each ward to permit 'blanks' @done (21-11-20 23:47)
+ ☐ TODO: adapt plot to present empty circles or similar for empty beds
+   set up a better colour scheme and position approach
+   suggest thinking about colour = discharge status (green = empty, amber = review, shades of red LoS)
+   then maybe wim is zero if empty
  ☐ TODO: break down bed list into functional units: will require some structure to beds 
+ ☐ TODO: tidy readme, explain config and set-up
+ ✔ TODO: nested columns for widgets https://mdbootstrap.com/docs/standard/layout/grid/ @done (21-11-19 09:12)
+ ☐ TODO: left table to single column and active cell to select as easier mouse target
+ ☐ FIXME: fix the problem with the plot being drawn behind layout objects below it
    e.g. North/South/PACU
    then you be able to filter by these units
    will need to instantiate a database for this
    ?sqlite for portability
+ ☐ TODO: re-insert the CRUD functionality
+ ☐ TODO: functionality to indicate in side bar d/c status (yes/review/no)
+   then add in a place to insert estimated admissions
+   then a bar to show final occupancy
+ ☐ TODO: ask Jon/Nel to help me wire this up to HYLODE with a postgres or similar backend
+ ☐ TODO: then bring in Zella's predictions and source data
