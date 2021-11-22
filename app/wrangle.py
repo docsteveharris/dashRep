@@ -50,6 +50,7 @@ def get_user_data(file_or_url: str, dev: bool = False) -> pd.DataFrame:
 def get_bed_skeleton(ward: str, file_or_url, dev: bool = False) -> pd.DataFrame:
     """
     Gets the ward skeleton.
+    Uses the valid_from column to drop invalid teams
 
     :param      ward:  The ward
     :type       ward:  str
@@ -59,6 +60,11 @@ def get_bed_skeleton(ward: str, file_or_url, dev: bool = False) -> pd.DataFrame:
     """
     if dev:
         df = pd.read_csv(file_or_url)
+        # keep only those rows where valid_to is missing
+        df[df['valid_to'].isna()]
+        # TODO: check for dups
+        df.drop('valid_to', axis=1, inplace=True)
+        print(df)
         return df
     else:
         raise NotImplementedError
