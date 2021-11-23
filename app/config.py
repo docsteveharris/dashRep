@@ -56,13 +56,14 @@ class Config:
             "wim_1": "WIM-P",
             "wim_r": "WIM-R",
             "bed_empty": "Empty",
+            "team": "Side",
         }
     )
 
     COLS_FULL = ["bay", "bed", "name", "mrn", "admission_age_years", "sex", "wim_1"]
     # COLS_FULL = {i:COLS[i] for i in COLS_FULL}
 
-    COLS_SIDEBAR = ["bay", "bed", "name"]
+    COLS_SIDEBAR = ["bay", "bed", "name", "team"]
     # COLS_SIDEBAR = {i:COLS[i] for i in COLS_SIDEBAR}
 
     COL_NAMES = [{"name": v, "id": k} for k, v in COLS.items()]
