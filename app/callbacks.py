@@ -187,7 +187,7 @@ def gen_graduated_bar_occ(json_data, occ_max=35):
     """
     df = pd.DataFrame.from_records(json_data)
 
-    occ = df.shape[0]
+    occ = df.mrn.count()
     occ_scaled = occ / occ_max * 10
 
     res = daq.GraduatedBar(

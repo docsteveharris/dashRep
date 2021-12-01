@@ -2,11 +2,14 @@
 Data management for the app
 Factored out here to make the flow of the code in the app easier to follow
 """
+import warnings
 import json
 
 import numpy as np
 import pandas as pd
 import requests
+import arrow
+
 
 
 def prep_cols_for_table(df, cols):
@@ -58,13 +61,14 @@ def get_bed_skeleton(ward: str, file_or_url, dev: bool = False) -> pd.DataFrame:
     :returns:   The ward skeleton.
     :rtype:     pd.DataFrame
     """
-    if dev:
+    if dev or 'T03' == ward:
+        warnings.warn('***FIXME: need to properly implement a database of ward structures')
         df = pd.read_csv(file_or_url)
         # keep only those rows where valid_to is missing
         df[df['valid_to'].isna()]
         # TODO: check for dups
         df.drop('valid_to', axis=1, inplace=True)
-        print(df)
+        # print(df)
         return df
     else:
         raise NotImplementedError
@@ -83,13 +87,24 @@ def merge_hylode_user_data(df_skeleton, df_hylode, df_user) -> pd.DataFrame:
     return df
 
 
+def isots_str2fmt(s: str, format='HH:mm DD MMM YY') -> str:
+    """
+    Convert from ISO formatted timestamp as string to alternative format
+    Handles nulls or NaNs
+    """ 
+    
+    if s in ["NaN", np.NaN] or not s:
+        return ""
+    else:
+        return arrow.get(s).format(format)
+
+
 def wrangle_data(df, cols):
     # TODO: refactor this as it does more than one thing
     # Prep and wrangle
 
     # sort out dates
-    df["admission_dt"] = pd.to_datetime(df["admission_dt"], infer_datetime_format=True)
-    df["admission_dt"] = df["admission_dt"].dt.strftime("%H:%M %d %b %Y")
+    df["admission_dt_str"] = df.loc[:, "admission_dt"].apply(isots_str2fmt)
 
     # convert LoS to days
     # df['elapsed_los_td'] = pd.to_numeric(df['elapsed_los_td'], errors='coerce')
