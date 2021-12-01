@@ -5,7 +5,7 @@ https://dash.plotly.com/urls
 import callbacks
 from config import ConfigFactory
 from dash import Input, Output, dcc, html
-from layouts import sitrep
+from layouts import sitrep, debug
 
 from app import app
 
@@ -21,6 +21,8 @@ app.layout = html.Div(
 def display_page(pathname):
     if pathname == "/sitrep":
         return sitrep
+    elif pathname == "/debug":
+        return debug
     else:
         # TODO return both the code and the page
         return "404"

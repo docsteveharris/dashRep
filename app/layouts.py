@@ -193,3 +193,19 @@ sitrep = dbc.Container(
         dash_only,
     ],
 )
+
+# For debugging
+import wrangle as wng
+df_hylode = wng.get_hylode_data(conf.HYLODE_DATA_SOURCE, dev=conf.DEV_HYLODE)
+print(df_hylode.head())
+debug = html.Div([
+    dt.DataTable(
+        id='debug',
+        columns = [{"name": i, "id": i} for i in df_hylode.columns],
+        data=df_hylode.to_dict('records'),
+        filter_action="native",
+        sort_action="native"
+
+        )
+])
+
