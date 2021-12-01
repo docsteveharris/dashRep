@@ -2,10 +2,11 @@
 Principle application file
 https://dash.plotly.com/urls
 """
-import callbacks
+
 from config import ConfigFactory
 from dash import Input, Output, dcc, html
-from layouts import sitrep, debug
+from app_sitrep import sitrep
+from app_debug import debug
 
 from app import app
 
