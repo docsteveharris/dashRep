@@ -1,26 +1,36 @@
-# Plan
+## Summary
 
-comparing streamlit to dash and I don't think that streamlit is mature enough
-dash is well documented and comes with a lot of the features that I would have to build myself
+Example web app to demonstrate how we can use Plotly's Dash for Hylode
 
-do all of this just in dash
-don't worry about dockerising for now
-build a dash version of the sitrep dashboard
+The majority of the work is in `./app`, and there's a separate 'app' for each webpage.
 
-stage 1
-connect to the API that Nel exposes
-read data
-present data
+The principal sitrep app is found at `./app/app_sitrep.py`. The top half of the file contains a series of functions that are called (via the _callback_ decorators) by the layout specified in the second half of the file.
 
-stage 2
-a visual layout
+The `wrangle.py` module hold generic data wrangling functions.
 
-stage 3
-cross filter so selection on the visual layout
-then filters the table holding the patient details
+And 'index.py' is the main coordinating module that in turn sets up the app ('app.py'), and routes to the different sub-apps (sitrep, debug etc.)
 
-stage 4
-make that table editable
+New apps and functionality can be deployed by duplicating and renaming `app_sitrep.py`, and then adding a new route in `index.py`.
 
-# Set-up
-git clone or navigate to `./dash-rep`
+## Installing
+
+## Running
+
+```sh
+poetry shell
+python app/index.py
+```
+
+It is often useful to run a JupyterLab instance during development.
+
+```sh
+poetry shell
+jupyter lab --port 8899 --ip 0.0.0.0
+```
+
+Note
+- the `--ip 0.0.0.0` flag allows me to connect to my dev machine across the network
+
+
+## Sublime IDE notes
+- enable LSP language server for pylsp globally; there's a problem with its per project isntallation
