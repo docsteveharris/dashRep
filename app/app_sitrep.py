@@ -97,23 +97,35 @@ def gen_datatable_side(json_data):
     Output("polar-main", "figure"),
     [
         Input("tbl-side-selection", "data"),
+        Input("compass-picker", "value"),
         Input("signal", "data"),
     ],
 )
-def draw_fig_polar(row_id, data):
+def draw_fig_polar(row_id, team, data):
     """
     Draws a fig polar.
+
+    :param      'team':  result from switches picking which parts of the data to show
+    :type       'data':  { type_description }
 
     :param      'data':  The data
     :type       'data':  { type_description }
     """
 
     df = pd.DataFrame.from_records(data)
+    fig = go.Figure()
+    print(team)
+    print(df.team.value_counts())
+
+    if not team:
+        return fig
+    else:
+        df = df[df.team.isin(team)]
+
     # set up markers for empty beds
     df.loc[df.bed_empty, "elapsed_los_td"] = 1  # 1 seconds
     df.loc[df.bed_empty, "wim_r"] = 0  # zero work intensity
 
-    fig = go.Figure()
     fig.add_trace(
         go.Scatterpolar(
             name="",  # names the 'trace'
@@ -161,7 +173,9 @@ def draw_fig_polar(row_id, data):
 
     dfi = df.reset_index(drop=True)
 
-    if row_id:
+    print(row_id)
+    print(dfi.bed_code)
+    if row_id and row_id in list(dfi.bed_code):
         row_num = dfi[dfi["id"] == row_id].index[0]
         row_nums = []
         row_nums.append(row_num)
@@ -263,7 +277,6 @@ def get_datatable_side_selected_row(row_id, json_data):
         row_id = row_id[0]
     return row_id
 
-
 # TODO n_intervals arg is unused but just ensures that store data updates
 @app.callback(Output("signal", "data"), Input("interval-data", "n_intervals"))
 def update_data_from_source(n_intervals):
@@ -319,11 +332,25 @@ main = html.Div(
                 # Heading of RIGHT 9/12 COLUMN
                 dbc.Col(
                     [
+                        dbc.Row([
+                                dbc.Col([html.Div(
+                                    dbc.Checklist(
+                                        id='compass-picker',
+                                        options=[
+                                        {'label': ' North ', 'value': 'North'},
+                                        {'label': ' South ', 'value': 'South'},
+                                        {'label': ' PACU ', 'value': 'PACU'},
+                                        ],
+                                        value=['North', 'South'],
+                                        switch=True,
+                                        inline=True,
+                                        ))],
+                                    md=6),
+                                dbc.Col(html.H2(
+                                    "Ward level metrics", style={"textAlign": "right"} ), md=6),
+                            ]),
                         dbc.Row(
                             [
-                                html.H2(
-                                    "Ward level metrics", style={"textAlign": "right"}
-                                ),
                                 dbc.Col(
                                     [
                                         dbc.Card(
@@ -355,7 +382,7 @@ main = html.Div(
                                                             id="wim-graduated-bar"
                                                         ),
                                                         html.P(
-                                                            "This is an estimate based on the overall burden of organ support"
+                                                            "Based on the overall burden of organ support"
                                                         ),
                                                     ]
                                                 ),
