@@ -116,9 +116,16 @@ def draw_fig_polar(row_id, team, data):
     fig = go.Figure()
 
     if not team:
+        # return emppty space if no team selected
         return fig
     else:
         df = df[df.team.isin(team)]
+
+    # Prep discharge status
+    df['discharge_indicator'] = 0.0
+    df.loc[df.discharge_ready_1_4h == 'No', 'discharge_indicator'] = 0.0
+    df.loc[df.discharge_ready_1_4h == 'Yes', 'discharge_indicator'] = 1.0
+    df.loc[df.discharge_ready_1_4h == 'Review', 'discharge_indicator'] = 0.5
 
     # set up markers for empty beds
     df.loc[df.bed_empty, "elapsed_los_td"] = 1  # 1 seconds
@@ -129,7 +136,8 @@ def draw_fig_polar(row_id, team, data):
             name="",  # names the 'trace'
             theta=df["bed"],
             # log x+1 to avoid negative numbers
-            marker_color=np.log(df["elapsed_los_td"]),
+            # marker_color=np.log(df["elapsed_los_td"]),
+            marker_color=df["discharge_indicator"],
             r=df[["wim_1", "wim_r"]].max(axis=1),
             mode="markers+text",
             text=df["bed"],
@@ -163,6 +171,15 @@ def draw_fig_polar(row_id, team, data):
 
     # fig.update_traces(marker_line_color="rgba(0,0,0,1)")
     # fig.update_traces(marker_opacity=0.8)
+
+    # set up colors for identifying d/c
+    # https://plotly.com/python/reference/scatterpolar/#scatterpolar-marker-colorscale
+    fig.update_traces(marker_colorscale=[
+        [0.0, 'rgb(255,69,58)'],
+        [0.5, 'rgb(255,159,10)'],
+        [1.0, 'rgb(50,215,75)'],
+        ])
+
     fig.update_traces(marker_sizemin=20)
     fig.update_traces(marker_size=20)
     fig.update_traces(marker_line_width=2)

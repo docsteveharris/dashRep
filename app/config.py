@@ -57,6 +57,7 @@ class Config:
             "wim_r": "WIM-R",
             "bed_empty": "Empty",
             "team": "Side",
+            "discharge_ready_1_4h": "Discharge",
         }
     )
 
