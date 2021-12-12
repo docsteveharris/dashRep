@@ -114,8 +114,6 @@ def draw_fig_polar(row_id, team, data):
 
     df = pd.DataFrame.from_records(data)
     fig = go.Figure()
-    print(team)
-    print(df.team.value_counts())
 
     if not team:
         return fig
@@ -173,8 +171,6 @@ def draw_fig_polar(row_id, team, data):
 
     dfi = df.reset_index(drop=True)
 
-    print(row_id)
-    print(dfi.bed_code)
     if row_id and row_id in list(dfi.bed_code):
         row_num = dfi[dfi["id"] == row_id].index[0]
         row_nums = []
