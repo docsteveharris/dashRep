@@ -24,7 +24,7 @@
         "avg_heart_rate_1_24h": 97.666664,
         "max_temp_1_12h": 37,
         "avg_resp_rate_1_24h": 15.5,
-        "wim_1": 0
+        "wim_1": 1
     },
     {
         "episode_slice_id": 162117,

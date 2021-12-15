@@ -133,14 +133,27 @@ def draw_fig_polar(row_id, team, data):
 
     fig.add_trace(
         go.Scatterpolar(
-            name="",  # names the 'trace'
-            theta=df["bed"],
-            # log x+1 to avoid negative numbers
-            # marker_color=np.log(df["elapsed_los_td"]),
-            marker_color=df["discharge_indicator"],
-            r=df[["wim_1", "wim_r"]].max(axis=1),
+
             mode="markers+text",
-            text=df["bed"],
+            name="",  # names the 'trace'
+
+            # ward bed
+            theta=df["bed"],
+
+            # marker radial position indicates discharge status
+            # edge = escape ; centre = plughole / not ready
+            r=df['discharge_indicator'],
+            marker_line_color=df["discharge_indicator"],
+            marker_line_width=2 + df["discharge_indicator"] * 4,
+
+            # inner color indicates severity of illness/work
+            marker_color="#FFF",
+            # marker_color=df[["wim_1", "wim_r"]].max(axis=1),
+            marker_size=20 + df[["wim_1", "wim_r"]].max(axis=1) * 5,
+
+            # text indicates WIM
+            text=df[["wim_1", "wim_r"]].max(axis=1),
+
             hovertemplate="WIM: %{r} Bed: %{theta}",
         )
     )
@@ -152,7 +165,7 @@ def draw_fig_polar(row_id, team, data):
     fig.update_polars(bgcolor="#FFF")
 
     # scale the 'hole' so that markers don't overlap when at baseline
-    fig.update_polars(hole=0.60)  # fraction of radius to remove
+    fig.update_polars(hole=0.70)  # fraction of radius to remove
 
     fig.update_polars(angularaxis_layer="below traces") #  so markers are above grid lines
     fig.update_polars(angularaxis_showgrid=True)
@@ -161,7 +174,7 @@ def draw_fig_polar(row_id, team, data):
     # tick combination below leaves nice space around angular lines
     fig.update_polars(angularaxis_ticks="outside")  # "" not ticks or "outside" or "inside"
     fig.update_polars(angularaxis_tickcolor="#FFF") # tick color match backgrund
-    fig.update_polars(angularaxis_direction="counterclockwise")
+    fig.update_polars(angularaxis_direction="clockwise")
 
     fig.update_polars(radialaxis_layer="below traces") #  so markers are above grid lines
     fig.update_polars(radialaxis_showgrid=False)  # removes grid
@@ -169,21 +182,30 @@ def draw_fig_polar(row_id, team, data):
     fig.update_polars(radialaxis_ticks="")  # do not draw the tickss
     fig.update_polars(radialaxis_showticklabels=False)  # removes axis labels
 
-    # fig.update_traces(marker_line_color="rgba(0,0,0,1)")
-    # fig.update_traces(marker_opacity=0.8)
 
     # set up colors for identifying d/c
     # https://plotly.com/python/reference/scatterpolar/#scatterpolar-marker-colorscale
+
+    fig.update_traces(marker_symbol="circle")
+    # color the marker centre
     fig.update_traces(marker_colorscale=[
+        [0, 'rgb(255, 118, 0 )'],
+        [1, 'rgb(255, 0, 0 )'],
+        ])
+    # fig.update_traces(marker_gradient_type="radial")
+    # fig.update_traces(marker_gradient_color="#F00")
+
+    # color the marker line (discharge)
+    fig.update_traces(marker_line_colorscale=[
         [0.0, 'rgb(255,69,58)'],
-        [0.5, 'rgb(255,159,10)'],
-        [1.0, 'rgb(50,215,75)'],
+        [0.5, 'rgb(255, 118, 0)'],
+        [1.0, 'rgb(15,136,0)'],
         ])
 
-    fig.update_traces(marker_sizemin=20)
-    fig.update_traces(marker_size=20)
-    fig.update_traces(marker_line_width=2)
-    fig.update_traces(marker_symbol="circle-open")
+
+    # fig.update_traces(marker_sizemin=30)
+    # fig.update_traces(marker_size=25)
+
     fig.update_traces(hovertemplate="LoS: %{r} Bed: %{theta}")
 
     dfi = df.reset_index(drop=True)
@@ -193,12 +215,12 @@ def draw_fig_polar(row_id, team, data):
         row_nums = []
         row_nums.append(row_num)
         fig.update_traces(selectedpoints=row_nums, selector=dict(type="scatterpolar"))
-        fig.update_traces(selected_marker_size=40, selector=dict(type="scatterpolar"))
-        # fig.update_traces(selected_marker_symbol="circle", selector=dict(type="scatterpolar"))
-        # fig.update_traces(selected_marker_opacity=1.0, selector=dict(type='scatterpolar'))
-        fig.update_traces(
-            selected_marker_color="red", selector=dict(type="scatterpolar")
-        )
+        # fig.update_traces(selected_marker_size=40, selector=dict(type="scatterpolar"))
+        fig.update_traces(selected_marker_opacity=1, selector=dict(type="scatterpolar"))
+        fig.update_traces(unselected_marker_opacity=0.5, selector=dict(type="scatterpolar"))
+        # fig.update_traces(
+        #     selected_marker_color="grey", selector=dict(type="scatterpolar")
+        # )
         fig.update_traces(
             selected_textfont_color="black", selector=dict(type="scatterpolar")
         )
