@@ -7,6 +7,7 @@ from config import ConfigFactory
 from dash import Input, Output, dcc, html
 from app_sitrep import sitrep
 from app_debug import debug
+from app_covid import covid
 
 from app import app
 
@@ -22,6 +23,8 @@ app.layout = html.Div(
 def display_page(pathname):
     if pathname == "/sitrep":
         return sitrep
+    elif pathname == "/covid":
+        return covid
     elif pathname == "/debug":
         return debug
     else:
