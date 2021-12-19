@@ -4,6 +4,7 @@ Display local COVID information
 """
 import pandas as pd
 import requests
+import arrow
 
 from dash import dash_table as dt
 from dash import dcc, html
@@ -14,6 +15,7 @@ import plotly.graph_objects as go
 
 from app import app
 
+UCLH_LOCAL_TRUSTS = ['RAL', 'RAP', 'RKE', 'RRP', 'RRV']
 
 @app.callback(
     Output("uclh-cases", "figure"),
@@ -23,35 +25,27 @@ def covid_scatter(data):
     df = pd.DataFrame.from_records(data)
     fig = go.Figure()
 
-    _df = df.loc[df.areaCode=='RRV']
-    fig.add_trace(
-        go.Scatter(
-            name='UCLH',
-            x=_df.date,
-            y=_df.hospitalCases,
-            ))
+    for trust in UCLH_LOCAL_TRUSTS:
+        _df = df.loc[df.areaCode==trust]
+        fig.add_trace(
+            go.Scatter(
+                name=_df.iloc[0].areaName,
+                x=_df.date,
+                y=_df.hospitalCases,
+                ))
 
-    _df = df.loc[df.areaCode=='RAP']
-    fig.add_trace(
-        go.Scatter(
-            name='North Mid',
-            x=_df.date,
-            y=_df.hospitalCases,
-            ))
     return fig
 
 @app.callback(Output("gov_uk", "data"), Input("interval-data", "n_intervals"))
 def request_covid_data(n_intervals):
     # Import COVID information as per the gov.uk API here
-    trust_codes = ['RRV', 'RAP']
-    dfs = []
-    for i, t in enumerate(trust_codes):
-        url = f"https://api.coronavirus.data.gov.uk/v2/data?areaType=nhsTrust&areaCode={t}&metric=hospitalCases&format=json"
-        response = requests.get(url)
-        df = pd.json_normalize(response.json(), record_path='body')
-        df['date'] = pd.to_datetime(df['date'])
-        dfs.append(df)
-    df = pd.concat(dfs)
+    # All hospitals
+    yesterday = str(arrow.now().shift(days=-1).format('YYYY-MM-DD'))
+    url = f"https://coronavirus.data.gov.uk/api/v2/data?areaType=nhsTrust&release={yesterday}&metric=hospitalCases&format=json"
+    response = requests.get(url)
+    df = pd.json_normalize(response.json(), record_path='body')
+    df = df[df.areaCode.isin(UCLH_LOCAL_TRUSTS)]
+    df['date'] = pd.to_datetime(df['date'])
     return df.to_dict("records")
 
 

@@ -1,0 +1,28 @@
+Column,Field Content,Size,Mandatory,Notes
+1,Organisation Code,5,Yes,
+2,Name,100,Yes,
+3,National Grouping,5,Yes,Linked Geographically
+4,High Level Health Geography,5,Yes,Linked Geographically
+5,Address Line 1,35,Yes,
+6,Address Line 2,35,No,
+7,Address Line 3,35,No,
+8,Address Line 4,35,Yes,
+9,Address Line 5,35,Yes,
+10,Postcode,8,Yes,
+11,Open Date,8,Yes,
+12,Close Date,8,No,
+13,Null,0,No,
+14,Null,0,No,
+15,Null,0,No,
+16,Null,0,No,
+17,Null,0,No,
+18,"Contact TelephoneNumber",12,No,
+19,Null,0,No,
+20,Null,0,No,
+21,Null,0,No,
+22,"Amended RecordIndicator",1,Yes,
+23,Null,0,No,
+24,GOR Code,1,Yes,"Government Office Region CodeLinked Geographically"
+25,Null,0,No,
+26,Null,0,No,
+27,Null,0,No,
