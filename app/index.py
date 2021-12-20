@@ -8,6 +8,7 @@ from dash import Input, Output, dcc, html
 from app_sitrep import sitrep
 from app_debug import debug
 from app_covid import covid
+from landing import landing
 
 from app import app
 
@@ -27,6 +28,9 @@ def display_page(pathname):
         return covid
     elif pathname == "/debug":
         return debug
+    elif pathname == "/":
+        # Landing page will be served at the basic
+        return landing
     else:
         # TODO return both the code and the page
         return "404"

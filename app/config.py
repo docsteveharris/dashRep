@@ -12,6 +12,8 @@ conf = ConfigFactory.factory()
 from collections import OrderedDict
 from os import environ
 from pathlib import Path
+from dash import dcc, html
+import dash_bootstrap_components as dbc
 
 from dotenv import find_dotenv, load_dotenv
 
@@ -89,3 +91,21 @@ class Development(Config):
 
     DEV_USER = True
     USER_DATA_SOURCE = Path("data/user_edits.csv")
+
+
+
+BANNER_TXT = ("UCLH Critical Care Sitrep v2",)
+header = html.Div(
+    dbc.Row(
+        [
+            dbc.Col(html.H1(BANNER_TXT, className="bg-primary text-white p-2"), md=12),
+        ]
+    )
+)
+
+nav = dbc.Nav([
+    dbc.NavItem(dbc.NavLink('Sitrep', href='/sitrep')),
+    dbc.NavItem(dbc.NavLink('COVID', href='/covid')),
+    ])
+
+footer = html.Div()

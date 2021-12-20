@@ -13,6 +13,8 @@ from dash import Dash, Input, Output, State
 import dash_bootstrap_components as dbc
 import plotly.graph_objects as go
 
+from config import header, nav
+
 from app import app
 
 UCLH_LOCAL_TRUSTS = ['RAL', 'RAP', 'RKE', 'RRP', 'RRV']
@@ -50,15 +52,20 @@ def request_covid_data(n_intervals):
 
 
 
+main = html.Div(dcc.Graph(id="uclh-cases"))
+
+dash_only = html.Div([
+        dcc.Interval(id="interval-data", interval = 24 * 60 * 60 * 1000, n_intervals=0),
+        dcc.Store(id="gov_uk")
+        ])
+
 
 covid = dbc.Container(
     fluid=True,
     children=[
-    # html.Div(covid_datatable)
-    html.Div(dcc.Graph(id="uclh-cases")),
-    html.Div([
-        dcc.Interval(id="interval-data", interval = 24 * 60 * 60 * 1000, n_intervals=0),
-        dcc.Store(id="gov_uk")
-        ]),
+    header,
+    nav,
+    main,
+    dash_only,
     ],
 )

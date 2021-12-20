@@ -15,6 +15,7 @@ from dash import dcc, html
 
 import wrangle as wng
 from config import ConfigFactory
+from config import header, nav
 from app import app
 
 conf = ConfigFactory.factory()
@@ -337,17 +338,6 @@ Layouts organised for sitrep
 - dash_only (to store non visible parts of the app)
 """
 
-# a bright banner across the top of the page
-
-BANNER_TXT = ("Sitrep v2: UCLH T03 current ICU patients",)
-header = html.Div(
-    dbc.Row(
-        [
-            dbc.Col(html.H1(BANNER_TXT, className="bg-primary text-white p-2"), md=12),
-        ]
-    )
-)
-
 # main page body currently split into two columns 9:3
 main = html.Div(
     [
@@ -489,6 +479,7 @@ main = html.Div(
     ]
 )
 
+# this footer over rides the one provided in config
 # footer! mainly marking the end of the page
 # but perhaps put the patient detail here
 footer = html.Div(
@@ -525,6 +516,7 @@ sitrep = dbc.Container(
     fluid=True,
     children=[
         header,
+        nav,
         main,
         footer,
         dash_only,
