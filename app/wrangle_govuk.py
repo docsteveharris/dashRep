@@ -1,3 +1,5 @@
+from io import StringIO
+
 import arrow
 import pandas as pd
 import plotly.express as px
@@ -7,10 +9,10 @@ from config import ConfigFactory
 conf = ConfigFactory.factory()
 
 
-
 engine = conf.GOV_UK_ENGINE
 YESTERDAY = str(arrow.now().shift(days=-1).format("YYYY-MM-DD"))
 URL_HOSP_CASES = f"https://coronavirus.data.gov.uk/api/v2/data?areaType=nhsTrust&release={YESTERDAY}&metric=hospitalCases&format=json"
+URL_CASES_BY_AGE = f"https://api.coronavirus.data.gov.uk/v2/data?areaType=region&areaCode=E12000007&metric=newCasesBySpecimenDateAgeDemographics&format=csv"
 
 # GOV UK dictionaries and lists
 
@@ -96,15 +98,14 @@ def prepare_trust_info():
     return df
 
 
-
-
-def request_gov_uk(url, table, engine) -> pd.DataFrame:
+def request_gov_uk(url, table, engine, format="json") -> pd.DataFrame:
     """
     Import COVID information as per the gov.uk API here
     but checks to see if the same request has already been run
     url: API connection
     table: table to store data in local SQLite
     conn: connection to local db for storing data and logging requests
+    format: json or csv
     """
     with engine.connect() as conn:
         requests_df = pd.read_sql("requests_log", conn)
@@ -114,7 +115,12 @@ def request_gov_uk(url, table, engine) -> pd.DataFrame:
 
         else:
             response = requests.get(url)
-            df = pd.json_normalize(response.json(), record_path="body")
+            if format == "json":
+                df = pd.json_normalize(response.json(), record_path="body")
+            elif format == "csv":
+                df = pd.read_csv(StringIO(response.text))
+            else:
+                raise NotImplementedError
             df.to_sql(table, conn, if_exists="replace")
 
             request_log = pd.DataFrame(
@@ -139,7 +145,21 @@ def clean_hosp_cases(df, TRUST_INFO):
     return df
 
 
+def clean_popn_cases(df):
+    """
+    Clean population cases (London)
+    df : data frame of population cases by age
+    """
+    df["date"] = pd.to_datetime(df["date"])
+    df.drop(["areaType", "areaCode", "areaType"], axis=1, inplace=True)
+    return df
+
+
 TRUST_INFO = prepare_trust_info()
 df = request_gov_uk(URL_HOSP_CASES, "hosp_cases", engine)
 df = clean_hosp_cases(df, TRUST_INFO)
 HOSP_CASES = df
+
+df = request_gov_uk(URL_CASES_BY_AGE, "cases_by_age", engine, format="csv")
+df = clean_popn_cases(df)
+CASES_BY_AGE = df

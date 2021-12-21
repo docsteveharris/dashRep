@@ -12,12 +12,30 @@ from dash import dash_table as dt
 from dash import dcc, html
 
 from config import header, nav
-from wrangle_govuk import HOSP_CASES
+from wrangle_govuk import HOSP_CASES, CASES_BY_AGE
 from app import app
 
 
+@app.callback(Output("cases-popn-age", "figure"), Input("cases-popn", "data"))
+def cases_popn_age(data):
+    df = pd.DataFrame.from_records(data)
+    age_bands = df.age.unique().tolist()
+    age_bands = list(set(age_bands) - set(['60+', '00_59', 'unassigned']))
+    fig = go.Figure()
 
-@app.callback(Output("cases-hosp-ncl", "figure"), Input("gov_uk", "data"))
+    for age in age_bands:
+        _df = df.loc[df.age == age]
+        fig.add_trace(
+            go.Scatter(
+                name=age,
+                x=_df.date,
+                y=_df.cases,
+            )
+        )
+    return fig
+
+
+@app.callback(Output("cases-hosp-ncl", "figure"), Input("cases-hosp", "data"))
 def cases_hosp_ncl(data):
     df = pd.DataFrame.from_records(data)
     df = df[df.inNCL01]
@@ -36,7 +54,7 @@ def cases_hosp_ncl(data):
     return fig
 
 
-@app.callback(Output("cases-hosp-london", "figure"), Input("gov_uk", "data"))
+@app.callback(Output("cases-hosp-london", "figure"), Input("cases-hosp", "data"))
 def cases_hosp_london(data):
     df = pd.DataFrame.from_records(data)
     df = df.groupby(['date', 'sectorName']).sum('hospitalCases').reset_index()
@@ -56,12 +74,17 @@ def cases_hosp_london(data):
     return fig
 
 
-@app.callback(Output("gov_uk", "data"), Input("interval-data", "n_intervals"))
+@app.callback(Output("cases-hosp", "data"), Input("interval-data", "n_intervals"))
 def request_hosp_cases(n_intervals):
     """Prepared in wrangle_govuk"""
     df = HOSP_CASES
     return df.to_dict("records")
 
+@app.callback(Output("cases-popn", "data"), Input("interval-data", "n_intervals"))
+def request_popn_cases(n_intervals):
+    """Prepared in wrangle_govuk"""
+    df = CASES_BY_AGE
+    return df.to_dict("records")
 
 tab_hospital = dbc.Row(
     [
@@ -86,10 +109,24 @@ tab_hospital = dbc.Row(
     ]
 )
 
+tab_popn = dbc.Row(
+    [
+        dbc.Card(
+            dbc.CardBody(
+                [
+                    html.H3("Population cases by age band (London)", className="card-title"),
+                    dcc.Graph(id="cases-popn-age"),
+                ]
+            ),
+            className="mt-3",
+        ),
+    ]
+)
 
 main = dbc.Tabs(
     [
         dbc.Tab(tab_hospital, label="Hospital cases"),
+        dbc.Tab(tab_popn, label="Community cases"),
     ]
 )
 
@@ -97,7 +134,8 @@ main = dbc.Tabs(
 dash_only = html.Div(
     [
         dcc.Interval(id="interval-data", interval=24 * 60 * 60 * 1000, n_intervals=0),
-        dcc.Store(id="gov_uk"),
+        dcc.Store(id="cases-hosp"),
+        dcc.Store(id="cases-popn"),
     ]
 )
 
