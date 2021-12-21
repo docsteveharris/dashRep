@@ -114,6 +114,7 @@ def draw_fig_polar(row_id, team, data):
     """
 
     df = pd.DataFrame.from_records(data)
+    print(df.info())
     fig = go.Figure()
 
     if not team:
@@ -129,8 +130,13 @@ def draw_fig_polar(row_id, team, data):
     df.loc[df.discharge_ready_1_4h == 'Review', 'discharge_indicator'] = 0.5
 
     # set up markers for empty beds
-    df.loc[df.bed_empty, "elapsed_los_td"] = 1  # 1 seconds
-    df.loc[df.bed_empty, "wim_r"] = 0  # zero work intensity
+    df['marker_size'] = 0
+    df.loc[df['wim_1'].notna(), 'marker_size'] = 20 + df[["wim_1", "wim_r"]].max(axis=1) * 5
+
+    # set up text for markers
+    mask = df['vent_type_1_4h'].isin(wng.VENTILATOR_ACRONYMS.keys())
+    df['marker_text'] = ""
+    df.loc[mask, 'marker_text'] = df.loc[mask, 'vent_type_1_4h'].map(wng.VENTILATOR_ACRONYMS)
 
     fig.add_trace(
         go.Scatterpolar(
@@ -149,13 +155,15 @@ def draw_fig_polar(row_id, team, data):
 
             # inner color indicates severity of illness/work
             marker_color="#FFF",
-            # marker_color=df[["wim_1", "wim_r"]].max(axis=1),
-            marker_size=20 + df[["wim_1", "wim_r"]].max(axis=1) * 5,
+            marker_size=df['marker_size'],
 
             # text indicates WIM
-            text=df[["wim_1", "wim_r"]].max(axis=1),
+            # text=df[["wim_1", "wim_r"]].max(axis=1),
+            text = df['marker_text'],
 
-            hovertemplate="WIM: %{r} Bed: %{theta}",
+            # hoverinfo='all'
+            hovertemplate="Discharge: %{r} Bed: %{theta}",
+            # hovertemplate="%{}",
         )
     )
 
@@ -184,17 +192,20 @@ def draw_fig_polar(row_id, team, data):
     fig.update_polars(radialaxis_showticklabels=False)  # removes axis labels
 
 
+    # FIXME: enhancement: can't get this to work
+    # nice example https://pyquestions.com/plotly-including-additional-data-in-hovertemplate
+    # possible explanatoin
+    # customdata = np.stack(df.mrn)
+    # fig.update_traces(customdata=customdata, hovertemplate='MRN: %{customdata[0]}')
+
     # set up colors for identifying d/c
     # https://plotly.com/python/reference/scatterpolar/#scatterpolar-marker-colorscale
-
     fig.update_traces(marker_symbol="circle")
     # color the marker centre
     fig.update_traces(marker_colorscale=[
         [0, 'rgb(255, 118, 0 )'],
         [1, 'rgb(255, 0, 0 )'],
         ])
-    # fig.update_traces(marker_gradient_type="radial")
-    # fig.update_traces(marker_gradient_color="#F00")
 
     # color the marker line (discharge)
     fig.update_traces(marker_line_colorscale=[
@@ -203,11 +214,7 @@ def draw_fig_polar(row_id, team, data):
         [1.0, 'rgb(15,136,0)'],
         ])
 
-
-    # fig.update_traces(marker_sizemin=30)
-    # fig.update_traces(marker_size=25)
-
-    fig.update_traces(hovertemplate="LoS: %{r} Bed: %{theta}")
+    fig.update_traces(textfont_size=10)
 
     dfi = df.reset_index(drop=True)
 
@@ -216,12 +223,8 @@ def draw_fig_polar(row_id, team, data):
         row_nums = []
         row_nums.append(row_num)
         fig.update_traces(selectedpoints=row_nums, selector=dict(type="scatterpolar"))
-        # fig.update_traces(selected_marker_size=40, selector=dict(type="scatterpolar"))
         fig.update_traces(selected_marker_opacity=1, selector=dict(type="scatterpolar"))
         fig.update_traces(unselected_marker_opacity=0.5, selector=dict(type="scatterpolar"))
-        # fig.update_traces(
-        #     selected_marker_color="grey", selector=dict(type="scatterpolar")
-        # )
         fig.update_traces(
             selected_textfont_color="black", selector=dict(type="scatterpolar")
         )

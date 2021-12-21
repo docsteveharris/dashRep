@@ -62,6 +62,7 @@ class Config:
             "bed_empty": "Empty",
             "team": "Side",
             "discharge_ready_1_4h": "Discharge",
+            "vent_type_1_4h": "Ventilation",
         }
     )
 

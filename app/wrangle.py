@@ -10,6 +10,15 @@ import pandas as pd
 import requests
 import arrow
 
+VENTILATOR_ACRONYMS = {
+    "Room air": "RA",
+    "Oxygen": "O2",
+    "Ventilated": "MV",
+    "Unknown": "?",
+    "HFNO": "HF",
+    "CPAP": "CP"
+}
+
 
 
 def prep_cols_for_table(df, cols):
@@ -34,7 +43,7 @@ def get_hylode_data(file_or_url: str, dev: bool = False) -> pd.DataFrame:
         df = pd.DataFrame.from_dict(r.json()["data"])
     else:
         df = pd.read_json(file_or_url)
-        print(df.head())
+        # print(df.head())
     return df
 
 
