@@ -21,5 +21,11 @@ and navigate to localhost:8050 in the browser
 Now do the same but use docker compose
 https://www.technologyscout.net/2020/05/running-dash-in-docker/
 
+2021-12-21t23:15:00
+Successful deploy to UCLH
+Had to hand load the little sqlite db
+and load a local .env file
+problems to fix with patient's who should have been discharged still appearing?
+
 
 
