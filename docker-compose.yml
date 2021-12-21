@@ -6,9 +6,19 @@ services:
         build:
             context: .
             dockerfile: Dockerfile.dash
+            args:
+                - http_proxy
+                - https_proxy
+                - HTTP_PROXY
+                - HTTPS_PROXY
         container_name: dash_dash
-        command: python app/index.py
+        environment:
+            - http_proxy
+            - https_proxy
+            - HTTP_PROXY
+            - HTTPS_PROXY
         volumes:
             - ./data:/data
         ports:
             - "8050:8009"
+        command: python app/index.py
