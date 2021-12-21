@@ -35,4 +35,4 @@ core.*
 .DS_Store
 *.sublime-workspace
 *.sublime-project
-todolist.txt
+todo*.txt
