@@ -18,6 +18,7 @@ Faker = "^9.5.2"
 requests = "^2.26.0"
 dash-daq = "^0.5.0"
 arrow = "^1.2.1"
+SQLAlchemy = "^1.4.28"
 
 [tool.poetry.dev-dependencies]
 jupyterlab = "^3.2.1"

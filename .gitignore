@@ -4,6 +4,9 @@ secret*
 scratch/*
 scratch.*
 
+# data
+data/*.db
+
 # Jupyter Notebook
 .ipynb_checkpoints
 

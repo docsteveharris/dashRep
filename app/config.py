@@ -9,6 +9,8 @@ conf = ConfigFactory.factory()
 
 """
 
+import pandas as pd
+from sqlalchemy import create_engine
 from collections import OrderedDict
 from os import environ
 from pathlib import Path
@@ -72,6 +74,9 @@ class Config:
     COL_NAMES = [{"name": v, "id": k} for k, v in COLS.items()]
 
     SKELETON_DATA_SOURCE = Path("data/skeleton.csv")
+    ETR_COLUMNS= Path('data/external/etr-columns.csv')
+    ETR_DATA= Path('data/external/etr.csv')
+    GOV_UK_ENGINE = create_engine("sqlite:///data/gov.db")
 
 
 class Production(Config):
@@ -109,3 +114,5 @@ nav = dbc.Nav([
     ])
 
 footer = html.Div()
+
+
