@@ -14,11 +14,11 @@ Found a simple dash hello world script for debugging
 https://www.datacamp.com/community/tutorials/learn-build-dash-python
 then
 ```sh
-docker run -d -p 8050:6050 test
+docker run -d -p 8050:8050 test
 ```
 and navigate to localhost:8050 in the browser
 
-To read
+Now do the same but use docker compose
 https://www.technologyscout.net/2020/05/running-dash-in-docker/
 
 
