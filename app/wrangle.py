@@ -103,7 +103,6 @@ def get_bed_skeleton(ward: str, file_or_url, dev: bool = False) -> pd.DataFrame:
         df[df['valid_to'].isna()]
         # TODO: check for dups
         df.drop('valid_to', axis=1, inplace=True)
-        # print(df)
         return df
     else:
         raise NotImplementedError

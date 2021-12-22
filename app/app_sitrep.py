@@ -114,7 +114,6 @@ def draw_fig_polar(row_id, team, data):
     """
 
     df = pd.DataFrame.from_records(data)
-    print(df.info())
     fig = go.Figure()
 
     if not team:
