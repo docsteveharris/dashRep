@@ -1,0 +1,393 @@
+[
+    {
+        "csn": "1028416416",
+        "mrn": "42312878",
+        "name": "Tracey Richardson",
+        "dob": "2002-10-15",
+        "sex": "F",
+        "ethnicity": [
+            "White British"
+        ],
+        "postcode": "38464",
+        "admission_dt": "2021-12-20T17:16:00+00:00",
+        "discharge_dt": null,
+        "bed_code": "BY02-17",
+        "bay_code": "BY02",
+        "bay_type": "Regular",
+        "ward_code": "T03"
+    },
+    {
+        "csn": "1001520859",
+        "mrn": "42357082",
+        "name": "Michael Morrison",
+        "dob": "1934-01-22",
+        "sex": "M",
+        "ethnicity": [
+            "White British"
+        ],
+        "postcode": "09693",
+        "admission_dt": "2021-12-21T21:37:00+00:00",
+        "discharge_dt": null,
+        "bed_code": "BY02-18",
+        "bay_code": "BY02",
+        "bay_type": "Regular",
+        "ward_code": "T03"
+    },
+    {
+        "csn": "1043740463",
+        "mrn": "47244691",
+        "name": "Kenneth Wilson",
+        "dob": "2015-05-28",
+        "sex": "M",
+        "ethnicity": [
+            "Not Stated / Unknown"
+        ],
+        "postcode": "04939",
+        "admission_dt": "2021-12-05T21:05:00+00:00",
+        "discharge_dt": null,
+        "bed_code": "BY02-19",
+        "bay_code": "BY02",
+        "bay_type": "Regular",
+        "ward_code": "T03"
+    },
+    {
+        "csn": "1059559457",
+        "mrn": "46460876",
+        "name": "Mark Brown",
+        "dob": "1966-04-13",
+        "sex": "M",
+        "ethnicity": [
+            "Not Stated / Unknown"
+        ],
+        "postcode": "33689",
+        "admission_dt": "2021-12-21T22:51:00+00:00",
+        "discharge_dt": null,
+        "bed_code": "BY02-20",
+        "bay_code": "BY02",
+        "bay_type": "Regular",
+        "ward_code": "T03"
+    },
+    {
+        "csn": "1033094830",
+        "mrn": "43323559",
+        "name": "Denise Price",
+        "dob": "1943-06-21",
+        "sex": "F",
+        "ethnicity": [
+            "White British"
+        ],
+        "postcode": "56152",
+        "admission_dt": "2021-12-13T23:42:00+00:00",
+        "discharge_dt": null,
+        "bed_code": "BY02-21",
+        "bay_code": "BY02",
+        "bay_type": "Regular",
+        "ward_code": "T03"
+    },
+    {
+        "csn": "1038864057",
+        "mrn": "47567783",
+        "name": "Samuel Morales",
+        "dob": "1957-06-12",
+        "sex": "M",
+        "ethnicity": [
+            "White British"
+        ],
+        "postcode": "46154",
+        "admission_dt": "2021-12-21T11:18:00+00:00",
+        "discharge_dt": null,
+        "bed_code": "BY03-22",
+        "bay_code": "BY03",
+        "bay_type": "Regular",
+        "ward_code": "T03"
+    },
+    {
+        "csn": "1073370644",
+        "mrn": "48355507",
+        "name": "Gina Tran",
+        "dob": "1960-02-02",
+        "sex": "F",
+        "ethnicity": [
+            "Not Stated / Unknown"
+        ],
+        "postcode": "38781",
+        "admission_dt": "2021-12-22T18:16:00+00:00",
+        "discharge_dt": null,
+        "bed_code": "BY03-23",
+        "bay_code": "BY03",
+        "bay_type": "Regular",
+        "ward_code": "T03"
+    },
+    {
+        "csn": "1075870652",
+        "mrn": "43405535",
+        "name": "Benjamin King",
+        "dob": "1998-07-09",
+        "sex": "M",
+        "ethnicity": [
+            null
+        ],
+        "postcode": "51854",
+        "admission_dt": "2021-12-20T19:57:00+00:00",
+        "discharge_dt": null,
+        "bed_code": "BY03-24",
+        "bay_code": "BY03",
+        "bay_type": "Regular",
+        "ward_code": "T03"
+    },
+    {
+        "csn": "1010318673",
+        "mrn": "43452578",
+        "name": "Richard Wilson",
+        "dob": "1948-11-28",
+        "sex": "M",
+        "ethnicity": [
+            "Not Stated / Unknown"
+        ],
+        "postcode": "84744",
+        "admission_dt": "2021-12-21T17:17:00+00:00",
+        "discharge_dt": null,
+        "bed_code": "BY03-25",
+        "bay_code": "BY03",
+        "bay_type": "Regular",
+        "ward_code": "T03"
+    },
+    {
+        "csn": "1095471792",
+        "mrn": "45063620",
+        "name": "Devin Black",
+        "dob": "1991-05-04",
+        "sex": "M",
+        "ethnicity": [
+            "White British"
+        ],
+        "postcode": "05547",
+        "admission_dt": "2021-12-20T14:50:00+00:00",
+        "discharge_dt": null,
+        "bed_code": "BY03-26",
+        "bay_code": "BY03",
+        "bay_type": "Regular",
+        "ward_code": "T03"
+    },
+    {
+        "csn": "1070745010",
+        "mrn": "47884889",
+        "name": "Marc Bailey",
+        "dob": "2000-05-31",
+        "sex": "M",
+        "ethnicity": [
+            "White British"
+        ],
+        "postcode": "38215",
+        "admission_dt": "2021-12-08T22:42:00+00:00",
+        "discharge_dt": null,
+        "bed_code": "BY04-28",
+        "bay_code": "BY04",
+        "bay_type": "Regular",
+        "ward_code": "T03"
+    },
+    {
+        "csn": "1011163369",
+        "mrn": "46237841",
+        "name": "Kelly Mitchell",
+        "dob": "1920-04-23",
+        "sex": "F",
+        "ethnicity": [
+            "Not Stated / Unknown"
+        ],
+        "postcode": "98591",
+        "admission_dt": "2021-12-22T16:18:00+00:00",
+        "discharge_dt": null,
+        "bed_code": "BY04-29",
+        "bay_code": "BY04",
+        "bay_type": "Regular",
+        "ward_code": "T03"
+    },
+    {
+        "csn": "1093311681",
+        "mrn": "40992802",
+        "name": "Tina Wells",
+        "dob": "1991-03-15",
+        "sex": "F",
+        "ethnicity": [
+            "Not Stated / Unknown"
+        ],
+        "postcode": "29417",
+        "admission_dt": "2021-12-15T03:46:00+00:00",
+        "discharge_dt": null,
+        "bed_code": "BY04-30",
+        "bay_code": "BY04",
+        "bay_type": "Regular",
+        "ward_code": "T03"
+    },
+    {
+        "csn": "1066174616",
+        "mrn": "45286690",
+        "name": "Barbara Mcknight",
+        "dob": "2004-11-10",
+        "sex": "F",
+        "ethnicity": [
+            null
+        ],
+        "postcode": "17677",
+        "admission_dt": "2021-12-22T17:15:00+00:00",
+        "discharge_dt": null,
+        "bed_code": "BY04-31",
+        "bay_code": "BY04",
+        "bay_type": "Regular",
+        "ward_code": "T03"
+    },
+    {
+        "csn": "1010540939",
+        "mrn": "48505030",
+        "name": "Christopher Kelley",
+        "dob": "1908-08-06",
+        "sex": "M",
+        "ethnicity": [
+            "Not Yet Asked"
+        ],
+        "postcode": "17156",
+        "admission_dt": "2021-12-18T20:02:00+00:00",
+        "discharge_dt": null,
+        "bed_code": "BY05-34",
+        "bay_code": "BY05",
+        "bay_type": "Regular",
+        "ward_code": "T03"
+    },
+    {
+        "csn": "1056008130",
+        "mrn": "43790305",
+        "name": "Wendy Pierce",
+        "dob": "1947-07-29",
+        "sex": "F",
+        "ethnicity": [
+            "White British"
+        ],
+        "postcode": "64681",
+        "admission_dt": "2021-12-21T21:04:00+00:00",
+        "discharge_dt": null,
+        "bed_code": "SR02-02",
+        "bay_code": "SR02",
+        "bay_type": "SideRoom",
+        "ward_code": "T03"
+    },
+    {
+        "csn": "1008897605",
+        "mrn": "44534793",
+        "name": "Desiree Lopez",
+        "dob": "1963-11-06",
+        "sex": "F",
+        "ethnicity": [
+            "Not Yet Asked"
+        ],
+        "postcode": "54304",
+        "admission_dt": "2021-12-10T21:44:00+00:00",
+        "discharge_dt": null,
+        "bed_code": "SR03-03",
+        "bay_code": "SR03",
+        "bay_type": "SideRoom",
+        "ward_code": "T03"
+    },
+    {
+        "csn": "1067061617",
+        "mrn": "40289925",
+        "name": "Kevin Young",
+        "dob": "1919-08-25",
+        "sex": "M",
+        "ethnicity": [
+            "Not Yet Asked"
+        ],
+        "postcode": "71772",
+        "admission_dt": "2021-12-16T23:11:00+00:00",
+        "discharge_dt": null,
+        "bed_code": "SR05-05",
+        "bay_code": "SR05",
+        "bay_type": "SideRoom",
+        "ward_code": "T03"
+    },
+    {
+        "csn": "1091876158",
+        "mrn": "49189960",
+        "name": "Austin Smith",
+        "dob": "1953-08-12",
+        "sex": "M",
+        "ethnicity": [
+            "Other Ethnic Group"
+        ],
+        "postcode": "82160",
+        "admission_dt": "2021-12-07T11:32:00+00:00",
+        "discharge_dt": null,
+        "bed_code": "SR06-06",
+        "bay_code": "SR06",
+        "bay_type": "SideRoom",
+        "ward_code": "T03"
+    },
+    {
+        "csn": "1027646868",
+        "mrn": "46346044",
+        "name": "Daniel Thompson",
+        "dob": "1908-11-26",
+        "sex": "M",
+        "ethnicity": [
+            "Other Ethnic Group"
+        ],
+        "postcode": "59378",
+        "admission_dt": "2021-12-11T13:39:00+00:00",
+        "discharge_dt": null,
+        "bed_code": "SR07-07",
+        "bay_code": "SR07",
+        "bay_type": "SideRoom",
+        "ward_code": "T03"
+    },
+    {
+        "csn": "1033500886",
+        "mrn": "49916949",
+        "name": "Lisa Taylor",
+        "dob": "2015-09-15",
+        "sex": "F",
+        "ethnicity": [
+            "Other Ethnic Group"
+        ],
+        "postcode": "03573",
+        "admission_dt": "2021-12-19T00:54:00+00:00",
+        "discharge_dt": null,
+        "bed_code": "SR08-08",
+        "bay_code": "SR08",
+        "bay_type": "SideRoom",
+        "ward_code": "T03"
+    },
+    {
+        "csn": "1002430043",
+        "mrn": "46451366",
+        "name": "David Cortez",
+        "dob": "1983-07-18",
+        "sex": "M",
+        "ethnicity": [
+            "Not Stated / Unknown"
+        ],
+        "postcode": "71492",
+        "admission_dt": "2021-12-19T16:44:00+00:00",
+        "discharge_dt": null,
+        "bed_code": "SR10-10",
+        "bay_code": "SR10",
+        "bay_type": "SideRoom",
+        "ward_code": "T03"
+    },
+    {
+        "csn": "1050063789",
+        "mrn": "48948278",
+        "name": "Joseph Thornton",
+        "dob": "1983-05-06",
+        "sex": "M",
+        "ethnicity": [
+            "White Irish"
+        ],
+        "postcode": "59826",
+        "admission_dt": "2021-12-14T08:26:00+00:00",
+        "discharge_dt": null,
+        "bed_code": "SR32-32",
+        "bay_code": "SR32",
+        "bay_type": "SideRoom",
+        "ward_code": "T03"
+    }
+]

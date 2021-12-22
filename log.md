@@ -29,3 +29,6 @@ problems to fix with patient's who should have been discharged still appearing?
 
 
 
+## 2021-12-22
+Set-up functionality to clean sitrep data by checking census data
+

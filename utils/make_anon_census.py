@@ -1,0 +1,62 @@
+# run this script from the datascience desktop to deidentify sample data
+# secrets is excluded from git etc
+# expects a single json file from the icu/live API
+# e.g
+# curl -X 'GET' \
+  # 'http://uclvlddpragae08:5006/emap/census/T03/' \
+  # -H 'accept: application/json'
+
+
+import json
+from pathlib import Path
+from datetime import datetime, date
+import random
+
+from faker import Faker
+
+fake = Faker()
+
+with Path('data/secret/census.json').open() as f:
+    persons = json.load(f)
+    persons = persons['data']
+
+# Make your own ethnicity faker
+ethnicities = [p['ethnicity'] for p in persons]
+
+
+
+for person in persons:
+    for k, v in person.items():
+        if k == 'name':
+            if person['sex'] == "F":
+                first_name = fake.first_name_female()
+            else:
+                first_name = fake.first_name_male()
+            replacement = f"{first_name} {fake.last_name()}"
+            person[k] = replacement
+        elif k == 'dob':
+            replacement = fake.date_of_birth()
+            replacement = replacement.strftime("%Y-%m-%d")
+            person[k] = replacement
+        elif k == 'csn':
+            replacement = fake.numerify("10########")
+            person[k] = replacement
+        elif k == 'mrn':
+            replacement = fake.numerify("4#######")
+            person[k] = replacement
+        elif k == 'postcode':
+            replacement = fake.postcode()
+            person[k] = replacement
+        elif k == 'ethnicity':
+            replacement = random.sample(ethnicities, 1)
+            person[k] = replacement
+        else:
+            print(f'WARNING: No action for {k}')
+            continue
+        print(f"original: {v}   replacement: {replacement}")
+
+# TODO Assert that change the content of the supplied JSON sampe but does NOT
+# change the structure
+
+with Path('data/census.json').open('w') as f:
+    json.dump(persons, f, indent=4)
