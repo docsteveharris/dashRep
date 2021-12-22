@@ -63,10 +63,10 @@ SECTORS_LONDON = {
 }
 
 TRUSTS_NCL = {
-    "RAL": "Royal Free",
     "RAP": "North Middlesex",
     "RKE": "Whittington",
-    "RRP": "Barnet",
+    "RAL": "Royal Free & Barnet",
+    # "RRP": "Barnet", # NOTE: this was the mental health trust
     "RRV": "UCLH",
 }
 
