@@ -43,7 +43,33 @@ def get_hylode_data(file_or_url: str, dev: bool = False) -> pd.DataFrame:
         df = pd.DataFrame.from_dict(r.json()["data"])
     else:
         df = pd.read_json(file_or_url)
-        # print(df.head())
+    return df
+
+
+def merge_census_data(sitrep: pd.DataFrame, census: pd.DataFrame, dev: bool = False) -> pd.DataFrame:
+    """
+    Cleans sitrep info to ensure that only patients currently in census are reported
+    
+    :param      sitrep:  dataframe containing sitrep info
+    :param      census:  dataframe containing census info
+    
+    :returns:   { description_of_the_return_value }
+    """
+    if dev:
+        # MRNs won't be in sycn if dev; just screen on beds
+        census = census[['ward_code', 'bay_code', 'bed_code']]
+        df = census.merge(sitrep, how='left')
+    else:
+        # WARN?: assumes that mrn does not change *during* the admission
+        census = census[['mrn','ward_code', 'bay_code', 'bed_code']]
+        # merge on beds and mrn
+        df = census.merge(sitrep, how='left')
+
+        chk = merge_census_data(sitrep, census, dev=True).csn.isna().sum()
+        if chk:
+            # now check that csn is not missing as a way of warning about non-merges
+            warnings.warn(f'***FIXME: merge sitrep onto census left {chk} beds without data')
+        
     return df
 
 

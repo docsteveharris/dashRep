@@ -323,7 +323,9 @@ def update_data_from_source(n_intervals):
     stores the data in a dcc.Store
     runs on load and will be triggered each time the table is updated or the REFRESH_INTERVAL elapses
     """
-    df_hylode = wng.get_hylode_data(conf.HYLODE_DATA_SOURCE, dev=conf.DEV_HYLODE)
+    df_sitrep = wng.get_hylode_data(conf.HYLODE_ICU_LIVE, dev=conf.DEV_HYLODE)
+    df_census = wng.get_hylode_data(conf.HYLODE_EMAP_CENSUS, dev=conf.DEV_HYLODE)
+    df_hylode = wng.merge_census_data(df_sitrep, df_census, dev=conf.DEV_HYLODE)
     ward = df_hylode["ward_code"][0]
     df_user = wng.get_user_data(conf.USER_DATA_SOURCE, dev=conf.DEV_USER)
     df_skeleton = wng.get_bed_skeleton(ward, conf.SKELETON_DATA_SOURCE, dev=conf.DEV)

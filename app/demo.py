@@ -22,14 +22,14 @@ load_dotenv(dotenv_path=dotenv_path)
 
 if os.getenv("DEVELOPMENT") == 'True':
     DEV_HYLODE = True
-    HYLODE_DATA_SOURCE = Path("data/icu.json")
+    HYLODE_ICU_LIVE = Path("data/icu.json")
     DEV_USER = True
     USER_DATA_SOURCE = Path("data/user_edits.csv")
 else:
     # Use the IP address b/c slow on DNS resolution
-    # HYLODE_DATA_SOURCE = 'http://uclvlddpragae08:5006/icu/live/T06/ui'
+    # HYLODE_ICU_LIVE = 'http://uclvlddpragae08:5006/icu/live/T06/ui'
     DEV_HYLODE = False
-    HYLODE_DATA_SOURCE = "http://172.16.149.205:5006/icu/live/T03/ui"
+    HYLODE_ICU_LIVE = "http://172.16.149.205:5006/icu/live/T03/ui"
     DEV_USER = True
     USER_DATA_SOURCE = Path("data/user_edits.csv")
 
@@ -267,7 +267,7 @@ def update_value(n_clicks, new_value, data, cell):
     writes the data back to the original data source
     this in turn then triggers the data table to reload
     """
-    global HYLODE_DATA_SOURCE
+    global HYLODE_ICU_LIVE
 
     if cell:
         col = cell["column_id"]
@@ -290,9 +290,9 @@ def update_data_from_source(n_intervals):
     stores the data in a dcc.Store
     runs on load and will be triggered each time the table is updated or the REFRESH_INTERVAL elapses
     """
-    global HYLODE_DATA_SOURCE
+    global HYLODE_ICU_LIVE
     global COLS
-    df_hylode = dmx.get_hylode_data(HYLODE_DATA_SOURCE, dev=DEV_HYLODE)
+    df_hylode = dmx.get_hylode_data(HYLODE_ICU_LIVE, dev=DEV_HYLODE)
     df_user = dmx.get_user_data(USER_DATA_SOURCE, dev=DEV_USER)
     df_orig = dmx.merge_hylode_user_data(df_hylode, df_user)
     df = dmx.wrangle_data(df_orig, COLS)

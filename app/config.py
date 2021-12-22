@@ -81,11 +81,16 @@ class Config:
 
 
 class Production(Config):
-    # Use the IP address b/c slow on DNS resolution
-    # HYLODE_DATA_SOURCE = 'http://uclvlddpragae08:5006/icu/live/T06/ui'
     DEV = False
+
     DEV_HYLODE = False
-    HYLODE_DATA_SOURCE = "http://172.16.149.205:5006/icu/live/T03/ui"
+    # Use the IP address b/c slow on DNS resolution
+    # e.g. HYLODE_ICU_LIVE = 'http://uclvlddpragae08:5006/icu/live/T06/ui'
+    # sitrep data
+    HYLODE_ICU_LIVE = "http://172.16.149.205:5006/icu/live/T03/ui"
+    # census data
+    HYLODE_EMAP_CENSUS = "http://172.16.149.205:5006/emap/census/T03/"
+
     DEV_USER = True
     USER_DATA_SOURCE = Path("data/user_edits.csv")
 
@@ -93,7 +98,8 @@ class Production(Config):
 class Development(Config):
     DEV = True
     DEV_HYLODE = True
-    HYLODE_DATA_SOURCE = Path("data/icu.json")
+    HYLODE_ICU_LIVE = Path("data/icu.json")
+    HYLODE_EMAP_CENSUS = Path("data/census.json")
 
     DEV_USER = True
     USER_DATA_SOURCE = Path("data/user_edits.csv")
