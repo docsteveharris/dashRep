@@ -2,7 +2,7 @@
 Principle application file
 https://dash.plotly.com/urls
 """
-
+import logging
 from config import ConfigFactory
 from dash import Input, Output, dcc, html
 from app_sitrep import sitrep
@@ -11,6 +11,10 @@ from app_covid import covid
 from landing import landing
 
 from app import app
+
+logging.basicConfig(filename='app.log', filemode='w', format='%(name)s - %(levelname)s - %(message)s')
+logging.basicConfig(level=logging.DEBUG)
+logging.info('--- Application starting')
 
 # configurable configuration
 conf = ConfigFactory.factory()

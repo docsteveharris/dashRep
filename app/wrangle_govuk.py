@@ -5,6 +5,7 @@ import pandas as pd
 import plotly.express as px
 import requests
 from config import ConfigFactory
+import logging
 
 conf = ConfigFactory.factory()
 
@@ -98,7 +99,7 @@ def prepare_trust_info():
     return df
 
 
-def request_gov_uk(url, table, engine, format="json") -> pd.DataFrame:
+def request_gov_uk(url, table, engine, format='json') -> pd.DataFrame:
     """
     Import COVID information as per the gov.uk API here
     but checks to see if the same request has already been run
@@ -108,25 +109,34 @@ def request_gov_uk(url, table, engine, format="json") -> pd.DataFrame:
     format: json or csv
     """
     with engine.connect() as conn:
-        requests_df = pd.read_sql("requests_log", conn)
-
-        if url in requests_df.request.values:
-            df = pd.read_sql(table, conn)
-
+        req_df = pd.read_sql('requests_log', conn, parse_dates=['request_ts'])
+        
+        request_exists = True if url in req_df.request.values else False
+        request_max_ts = req_df.loc[req_df.request == URL_CASES_BY_AGE, 'request_ts'].max() 
+        request_recent = True if request_max_ts > arrow.now().shift(days=-1) else False
+        
+        if request_exists and request_recent:
+            logging.info(f'--- using cached data for {table}')
+            # sql call at end of function        
         else:
+            logging.info(f'--- requesting from gov.uk for {table}')
             response = requests.get(url)
-            if format == "json":
+            if format == 'json':
                 df = pd.json_normalize(response.json(), record_path="body")
-            elif format == "csv":
+            elif format == 'csv':
                 df = pd.read_csv(StringIO(response.text))
             else:
                 raise NotImplementedError
-            df.to_sql(table, conn, if_exists="replace")
+            df.to_sql(table, conn, if_exists='replace')
 
-            request_log = pd.DataFrame(
-                {"request": [url], "table": [table], "request_ts": [str(arrow.now())]}
-            )
-            request_log.to_sql("requests_log", conn, if_exists="append")
+            request_log = pd.DataFrame({
+                'request': [url],
+                'table': [table],
+                'request_ts': [str(arrow.now())]
+            })
+            request_log.to_sql('requests_log', conn, if_exists='append')
+            
+        df = pd.read_sql(table, conn, parse_dates=['date'])
     return df
 
 
