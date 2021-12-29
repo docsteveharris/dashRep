@@ -2,318 +2,22 @@
 Functions (callbacks) that provide the functionality
 """
 import json
+
+import dash_bootstrap_components as dbc
+import dash_daq as daq
 import numpy as np
 import pandas as pd
-
 import plotly.graph_objects as go
-
-import dash_daq as daq
-import dash_bootstrap_components as dbc
+import wrangle as wng
+from config import ConfigFactory, footer, header, nav
 from dash import Dash, Input, Output, State
 from dash import dash_table as dt
 from dash import dcc, html
 
-import wrangle as wng
-from config import ConfigFactory
-from config import header, nav
 from app import app
 
 conf = ConfigFactory.factory()
 
-
-@app.callback(
-    Output("datatable-patient", "children"),
-    [
-        Input("tbl-side-selection", "data"),
-        Input("signal", "data"),
-    ],
-)
-def gen_datatable_patient(row_id, json_data):
-    """
-    Draw the patient level data
-
-    :param      row_id:  the row selected from the side datatable
-    :param      data:        the patient data
-    """
-    # filter cols
-    COL_NAMES = [
-        {"name": v, "id": k} for k, v in conf.COLS.items() if k in conf.COLS_FULL
-    ]
-
-    # TODO: shouldn't need to do a roundtrip through a pandas dataframe
-    # filter the json data by the selected table row
-    df = pd.DataFrame.from_records(json_data)
-    df = df[df["id"] == row_id]  # must use tbl id
-    json_data = df.to_dict("records")
-
-    return [
-        dt.DataTable(
-            id="tbl-patient", columns=COL_NAMES, data=json_data, editable=False
-        )
-    ]
-
-
-@app.callback(
-    Output("datatable-side", "children"),
-    [
-        Input("signal", "data"),
-    ],
-)
-def gen_datatable_side(json_data):
-    COL_NAMES = [
-        {"name": v, "id": k} for k, v in conf.COLS.items() if k in conf.COLS_SIDEBAR
-    ]
-
-    return [
-        dt.DataTable(
-            id="tbl-side",
-            columns=COL_NAMES,
-            data=json_data,
-            editable=False,
-            # active_cell=True,
-            style_as_list_view=True,  # remove col lines
-            style_cell={
-                "fontSize": 12,
-                # 'font-family':'sans-serif',
-                "padding": "3px",
-            },
-            style_cell_conditional=[
-                {"if": {"column_id": "bay"}, "textAlign": "right"},
-                {"if": {"column_id": "bed"}, "textAlign": "left"},
-                {"if": {"column_id": "name"}, "textAlign": "left"},
-                {"if": {"column_id": "name"}, "fontWeight": "bolder"},
-            ],
-            style_data={"color": "black", "backgroundColor": "white"},
-            style_data_conditional=[
-                {"if": {"row_index": "odd"}, "backgroundColor": "rgb(220, 220, 220)"}
-            ],
-            sort_action="native",
-            cell_selectable=True,  # possible to click and navigate cells
-            row_selectable="single",
-        ),
-    ]
-
-
-@app.callback(
-    Output("polar-main", "figure"),
-    [
-        Input("tbl-side-selection", "data"),
-        Input("compass-picker", "value"),
-        Input("signal", "data"),
-    ],
-)
-def draw_fig_polar(row_id, team, data):
-    """
-    Draws a fig polar.
-
-    :param      'team':  result from switches picking which parts of the data to show
-    :type       'data':  { type_description }
-
-    :param      'data':  The data
-    :type       'data':  { type_description }
-    """
-
-    df = pd.DataFrame.from_records(data)
-    fig = go.Figure()
-
-    if not team:
-        # return emppty space if no team selected
-        return fig
-    else:
-        df = df[df.team.isin(team)]
-
-    # Prep discharge status
-    df['discharge_indicator'] = 0.0
-    df.loc[df.discharge_ready_1_4h == 'No', 'discharge_indicator'] = 0.0
-    df.loc[df.discharge_ready_1_4h == 'Yes', 'discharge_indicator'] = 1.0
-    df.loc[df.discharge_ready_1_4h == 'Review', 'discharge_indicator'] = 0.5
-
-    # set up markers for empty beds
-    df['marker_size'] = 0
-    df.loc[df['wim_1'].notna(), 'marker_size'] = 20 + df[["wim_1", "wim_r"]].max(axis=1) * 5
-
-    # set up text for markers
-    mask = df['vent_type_1_4h'].isin(wng.VENTILATOR_ACRONYMS.keys())
-    df['marker_text'] = ""
-    df.loc[mask, 'marker_text'] = df.loc[mask, 'vent_type_1_4h'].map(wng.VENTILATOR_ACRONYMS)
-
-    fig.add_trace(
-        go.Scatterpolar(
-
-            mode="markers+text",
-            name="",  # names the 'trace'
-
-            # ward bed
-            theta=df["bed"],
-
-            # marker radial position indicates discharge status
-            # edge = escape ; centre = plughole / not ready
-            r=df['discharge_indicator'],
-            marker_line_color=df["discharge_indicator"],
-            marker_line_width=2 + df["discharge_indicator"] * 4,
-
-            # inner color indicates severity of illness/work
-            marker_color="#FFF",
-            marker_size=df['marker_size'],
-
-            # text indicates WIM
-            # text=df[["wim_1", "wim_r"]].max(axis=1),
-            text = df['marker_text'],
-
-            # hoverinfo='all'
-            hovertemplate="Discharge: %{r} Bed: %{theta}",
-            # hovertemplate="%{}",
-        )
-    )
-
-    # update layout
-    fig.update_layout(margin=dict(t=20, b=20, l=20, r=20))
-
-    # update polar plot
-    fig.update_polars(bgcolor="#FFF")
-
-    # scale the 'hole' so that markers don't overlap when at baseline
-    fig.update_polars(hole=0.70)  # fraction of radius to remove
-
-    fig.update_polars(angularaxis_layer="below traces") #  so markers are above grid lines
-    fig.update_polars(angularaxis_showgrid=True)
-    fig.update_polars(angularaxis_showline=False)
-    fig.update_polars(angularaxis_gridcolor="#EBEBEB")
-    # tick combination below leaves nice space around angular lines
-    fig.update_polars(angularaxis_ticks="outside")  # "" not ticks or "outside" or "inside"
-    fig.update_polars(angularaxis_tickcolor="#FFF") # tick color match backgrund
-    fig.update_polars(angularaxis_direction="clockwise")
-
-    fig.update_polars(radialaxis_layer="below traces") #  so markers are above grid lines
-    fig.update_polars(radialaxis_showgrid=False)  # removes grid
-    fig.update_polars(radialaxis_showline=False)
-    fig.update_polars(radialaxis_ticks="")  # do not draw the tickss
-    fig.update_polars(radialaxis_showticklabels=False)  # removes axis labels
-
-
-    # FIXME: enhancement: can't get this to work
-    # nice example https://pyquestions.com/plotly-including-additional-data-in-hovertemplate
-    # possible explanatoin
-    # customdata = np.stack(df.mrn)
-    # fig.update_traces(customdata=customdata, hovertemplate='MRN: %{customdata[0]}')
-
-    # set up colors for identifying d/c
-    # https://plotly.com/python/reference/scatterpolar/#scatterpolar-marker-colorscale
-    fig.update_traces(marker_symbol="circle")
-    # color the marker centre
-    fig.update_traces(marker_colorscale=[
-        [0, 'rgb(255, 118, 0 )'],
-        [1, 'rgb(255, 0, 0 )'],
-        ])
-
-    # color the marker line (discharge)
-    fig.update_traces(marker_line_colorscale=[
-        [0.0, 'rgb(255,69,58)'],
-        [0.5, 'rgb(255, 118, 0)'],
-        [1.0, 'rgb(15,136,0)'],
-        ])
-
-    fig.update_traces(textfont_size=10)
-
-    dfi = df.reset_index(drop=True)
-
-    if row_id and row_id in list(dfi.bed_code):
-        row_num = dfi[dfi["id"] == row_id].index[0]
-        row_nums = []
-        row_nums.append(row_num)
-        fig.update_traces(selectedpoints=row_nums, selector=dict(type="scatterpolar"))
-        fig.update_traces(selected_marker_opacity=1, selector=dict(type="scatterpolar"))
-        fig.update_traces(unselected_marker_opacity=0.5, selector=dict(type="scatterpolar"))
-        fig.update_traces(
-            selected_textfont_color="black", selector=dict(type="scatterpolar")
-        )
-
-    return fig
-
-
-@app.callback(Output("occ-graduated-bar", "children"), Input("signal", "data"))
-def gen_graduated_bar_occ(json_data, occ_max=35):
-    """
-    Generates the graduated bar summarising current occupancy
-
-    :param      json_data:  json representation of the current dataframe
-    :type       json_data:  { type_description }
-    """
-    df = pd.DataFrame.from_records(json_data)
-
-    occ = df.mrn.count()
-    occ_scaled = occ / occ_max * 10
-
-    res = daq.GraduatedBar(
-        color={
-            "gradient": True,
-            "ranges": {"green": [0, 4], "yellow": [4, 7], "red": [7, 10]},
-        },
-        showCurrentValue=True,
-        # vertical=True,
-        value=occ_scaled,
-    )
-
-    return res
-
-
-@app.callback(Output("wim-graduated-bar", "children"), Input("signal", "data"))
-def gen_graduated_bar_wim(json_data, wim_max=175):
-    """
-    Generates the graduated bar summarising current work intensity
-    Assumes the max possible is ?5x the number number of beds
-
-    :param      json_data:  json representation of the current dataframe
-    :type       json_data:  { type_description }
-    """
-    df = pd.DataFrame.from_records(json_data)
-
-    wim_sum = df[["wim_1", "wim_r"]].max(axis=1).sum()
-    wim_sum_scaled = wim_sum / wim_max * 10
-
-    res = daq.GraduatedBar(
-        color={
-            "gradient": True,
-            "ranges": {"green": [0, 4], "yellow": [4, 7], "red": [7, 10]},
-        },
-        showCurrentValue=True,
-        # vertical=True,
-        value=wim_sum_scaled,
-    )
-
-    return res
-
-
-@app.callback(
-    Output("msg", "children"),
-    [
-        Input("tbl-side-selection", "data"),
-    ],
-)
-def gen_msg(active_row):
-    if not active_row:
-        res = """Click the table"""
-
-    res = str(active_row)
-    res = f"Selected row id is {res}"
-    return res
-
-
-@app.callback(
-    Output("tbl-side-selection", "data"),
-    Input("tbl-side", "derived_virtual_selected_row_ids"),
-    State("signal", "data"),
-)
-def get_datatable_side_selected_row(row_id, json_data):
-    """
-    returns the 'row_id' selected from the datatable (side bar)
-    if nothing selected then returns the first row
-    """
-    if not row_id:
-        row_id = json_data[0]["id"]
-    else:
-        row_id = row_id[0]
-    return row_id
 
 # TODO n_intervals arg is unused but just ensures that store data updates
 @app.callback(Output("signal", "data"), Input("interval-data", "n_intervals"))
@@ -333,174 +37,151 @@ def update_data_from_source(n_intervals):
     return df.to_dict("records")
 
 
+@app.callback(
+    Output("datatable-main", "children"),
+    [
+        Input("signal", "data"),
+    ],
+)
+def gen_datatable_main(json_data):
+    COL_NAMES = [
+        {"name": v, "id": k} for k, v in conf.COLS.items() if k in conf.COLS_FULL
+    ]
+
+    return [
+        dbc.Container(
+        dt.DataTable(
+            id="tbl-main",
+            columns=COL_NAMES,
+            data=json_data,
+            editable=False,
+            # active_cell=True,
+            # style_as_list_view=True,  # remove col lines
+            style_cell={
+                "fontSize": 12,
+                # 'font-family':'sans-serif',
+                "padding": "3px",
+            },
+            style_cell_conditional=[
+                {"if": {"column_id": "bay"}, "textAlign": "right"},
+                {"if": {"column_id": "bed"}, "textAlign": "left"},
+                {"if": {"column_id": "name"}, "textAlign": "left"},
+                {"if": {"column_id": "name"}, "fontWeight": "bolder"},
+            ],
+            style_data={"color": "black", "backgroundColor": "white"},
+            # striped rows
+            style_data_conditional=[
+                {"if": {"row_index": "odd"}, "backgroundColor": "rgb(220, 220, 220)"}
+            ],
+            sort_action="native",
+            cell_selectable=True,  # possible to click and navigate cells
+            # row_selectable="single",
+        ),
+        # className="dbc",
+        )
+    ]
+
+
+@app.callback(Output("icu_active", "children"), Input("icu_radio", "value"))
+def display_value(value):
+    return f"Selected value: {value}"
+
 
 """
 Layouts organised for sitrep
-- header
+- header (from config)
+- nav (from config)
 - main
-- footer
+- footer (from config)
 - dash_only (to store non visible parts of the app)
 """
 
-# main page body currently split into two columns 9:3
-main = html.Div(
+icu_radio_button = html.Div(
     [
-        # # Full width row
-        # dbc.Row([
-        #         html.Div([html.H2('UCLH T03 ICU Current Patients')]),
-        #         ]),
-        dbc.Row(
+        html.Div(
             [
-                # Heading of LEFT 3/12 COLUMN
-                dbc.Col(
-                    [
-                        html.Div(id="datatable-side"),
+                dbc.RadioItems(
+                    id="icu_radio",
+                    className="d-grid d-md-flex justify-content-md-end btn-group",
+                    inputClassName="btn-check",
+                    labelClassName="btn btn-outline-info",
+                    labelCheckedClassName="active btn-info",
+                    options=[
+                        {"label": "T03", "value": "T03"},
+                        {"label": "T06", "value": "T06"},
+                        {"label": "GWB", "value": "GWB"},
+                        {"label": "WMS", "value": "WMS"},
+                        {"label": "NHNN", "value": "NHNN"},
                     ],
-                    md=3,
-                ),
-                # Heading of RIGHT 9/12 COLUMN
-                dbc.Col(
-                    [
-                        dbc.Row([
-                                dbc.Col([html.Div(
-                                    dbc.Checklist(
-                                        id='compass-picker',
-                                        options=[
-                                        {'label': ' North ', 'value': 'North'},
-                                        {'label': ' South ', 'value': 'South'},
-                                        {'label': ' PACU ', 'value': 'PACU'},
-                                        ],
-                                        value=['North', 'South'],
-                                        switch=True,
-                                        inline=True,
-                                        ))],
-                                    md=6),
-                                dbc.Col(html.H2(
-                                    "Ward level metrics", style={"textAlign": "right"} ), md=6),
-                            ]),
-                        dbc.Row(
-                            [
-                                dbc.Col(
-                                    [
-                                        dbc.Card(
-                                            [
-                                                dbc.CardHeader("Ward occupancy"),
-                                                dbc.CardBody(
-                                                    [
-                                                        html.Div(
-                                                            id="occ-graduated-bar"
-                                                        ),
-                                                        html.P(
-                                                            "Based on the total possible beds (not staff)"
-                                                        ),
-                                                    ]
-                                                ),
-                                            ]
-                                        ),
-                                    ],
-                                    md=6,
-                                ),
-                                dbc.Col(
-                                    [
-                                        dbc.Card(
-                                            [
-                                                dbc.CardHeader("Work Intensity"),
-                                                dbc.CardBody(
-                                                    [
-                                                        html.Div(
-                                                            id="wim-graduated-bar"
-                                                        ),
-                                                        html.P(
-                                                            "Based on the overall burden of organ support"
-                                                        ),
-                                                    ]
-                                                ),
-                                            ]
-                                        ),
-                                    ],
-                                    md=6,
-                                ),
-                            ]
-                        ),
-                        html.Br(),
-                        dbc.Row(
-                            [
-                                dbc.Col(
-                                    [
-                                        dbc.Card(
-                                            [
-                                                dbc.CardHeader(
-                                                    "Patient details after selcting from the side table"
-                                                ),
-                                                dbc.CardBody(
-                                                    [html.Div(id="datatable-patient")]
-                                                ),
-                                            ]
-                                        ),
-                                    ],
-                                    md=12,
-                                )
-                            ]
-                        ),
-                        html.Br(),
-                        dbc.Row(
-                            [
-                                dbc.Col(
-                                    [
-                                        dbc.Card(
-                                            [
-                                                dbc.CardHeader(
-                                                    "Patients displayed by bed number"
-                                                ),
-                                                dbc.CardBody(
-                                                    [
-                                                        # html.Div([ html.P('Patients displayed by bed number', className="card-text"), ]),
-                                                        html.Div(
-                                                            dcc.Graph(
-                                                                id="polar-main",
-                                                                config={
-                                                                    "responsive": True,
-                                                                    "autosizable": True,
-                                                                    "displaylogo": False,
-                                                                },
-                                                            )
-                                                        ),
-                                                    ]
-                                                ),
-                                            ]
-                                        ),
-                                    ],
-                                    md=12,
-                                )
-                            ]
-                        ),
-                    ],
-                    md=9,
-                ),
+                    value="T03",
+                )
             ],
-            align="start",
-        )
-    ]
+        ),
+        html.Div(id="icu_active"),
+    ],
+    className="radio-group",
 )
 
-# this footer over rides the one provided in config
-# footer! mainly marking the end of the page
-# but perhaps put the patient detail here
-footer = html.Div(
-    dbc.Row(
-        [
-            dbc.Col(
-                html.Div(
+
+# main page body currently split into two columns 9:3
+main = dbc.Container(
+    [
+        # All unit content here plus unit selector
+        dbc.Row(
+            [
+                dbc.Col(
                     [
-                        dbc.Alert(id="msg"),
-                        # html.P(id='msg'),
-                        html.P("Here is some detailed note held in the footer"),
-                    ]
+                        html.I(className="fa fa-lungs-virus"),
+                        html.P("Placeholder initial text"),
+                    ],
+                    width={"order": "first", "width": True},
                 ),
-                md=12,
-            ),
-        ]
-    )
+                dbc.Col([icu_radio_button], width={"order": "last", "width": "auto"}),
+            ],
+            justify="between",
+        ),
+        # Unit specific content here
+        dbc.Row(
+            [
+                dbc.Col(
+                    [html.Div(id="datatable-main")],
+                    md=6,
+                ),
+                dbc.Col(
+                    [
+                        dbc.Row(
+                            [
+                                dbc.Card(
+                                    [
+                                        dbc.CardHeader("Ward aggregate details"),
+                                        dbc.CardBody("CardBody"),
+                                        dbc.CardFooter("CardFooter"),
+                                    ]
+                                ),
+                            ],
+                            align="start",
+                        ),
+                        dbc.Row(
+                            [
+                                dbc.Card(
+                                    [
+                                        dbc.CardHeader("Patient specific details"),
+                                        dbc.CardBody("CardBody"),
+                                        dbc.CardFooter("CardFooter"),
+                                    ]
+                                ),
+                            ],
+                            align="end",
+                        ),
+                    ],
+                    md=6,
+                ),
+            ],
+            align="end",
+        ),
+    ],
+    fluid=True,
+    # className="dbc",
 )
 
 
@@ -518,6 +199,7 @@ dash_only = html.Div(
 # """Principal layout for sitrep2 page"""
 sitrep = dbc.Container(
     fluid=True,
+    className="dbc",
     children=[
         header,
         nav,

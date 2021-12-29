@@ -9,15 +9,15 @@ conf = ConfigFactory.factory()
 
 """
 
-import pandas as pd
-from sqlalchemy import create_engine
 from collections import OrderedDict
 from os import environ
 from pathlib import Path
-from dash import dcc, html
-import dash_bootstrap_components as dbc
 
+import dash_bootstrap_components as dbc
+import pandas as pd
+from dash import dcc, html
 from dotenv import find_dotenv, load_dotenv
+from sqlalchemy import create_engine
 
 # .env file stored at project root
 dotenv_path = Path(__file__).parent.parent.resolve() / ".env"
@@ -75,8 +75,8 @@ class Config:
     COL_NAMES = [{"name": v, "id": k} for k, v in COLS.items()]
 
     SKELETON_DATA_SOURCE = Path("data/skeleton.csv")
-    ETR_COLUMNS= Path('data/external/etr-columns.csv')
-    ETR_DATA= Path('data/external/etr.csv')
+    ETR_COLUMNS = Path("data/external/etr-columns.csv")
+    ETR_DATA = Path("data/external/etr.csv")
     GOV_UK_ENGINE = create_engine("sqlite:///data/gov.db")
 
 
@@ -105,21 +105,38 @@ class Development(Config):
     USER_DATA_SOURCE = Path("data/user_edits.csv")
 
 
-
-BANNER_TXT = ("UCLH Critical Care Sitrep v2",)
-header = html.Div(
+header = dbc.Container(
     dbc.Row(
         [
-            dbc.Col(html.H1(BANNER_TXT, className="bg-primary text-white p-2"), md=12),
+            # dbc.Col([
+            #             html.I(className="fa fa-lungs-virus"),
+            #             ], md=1),
+            dbc.Col(
+                [
+                    dbc.NavbarSimple(
+                        children=[
+                            dbc.NavItem(dbc.NavLink("ICU", href="/sitrep")),
+                            dbc.NavItem(dbc.NavLink("ED", href="/ed")),
+                            dbc.NavItem(dbc.NavLink(["COVID"], href="/covid")),
+                        ],
+                        brand="UCLH Critical Care Sitrep",
+                        brand_href="/",
+                        brand_external_link=True,
+                        color="primary",
+                        dark=True,
+                        sticky=True,
+                    ),
+                ]
+            ),
         ]
-    )
+    ),
+    fluid=True,
 )
 
-nav = dbc.Nav([
-    dbc.NavItem(dbc.NavLink('Sitrep', href='/sitrep')),
-    dbc.NavItem(dbc.NavLink('COVID', href='/covid')),
-    ])
+nav = dbc.Container(fluid=True)
+# nav = dbc.Nav([
+#     dbc.NavItem(dbc.NavLink('Sitrep', href='/sitrep')),
+#     dbc.NavItem(dbc.NavLink('COVID', href='/covid')),
+#     ])
 
-footer = html.Div()
-
-
+footer = dbc.Container(fluid=True)

@@ -1,0 +1,294 @@
+# copies of functions from original app
+@app.callback(
+    Output("datatable-patient", "children"),
+    [
+        Input("tbl-side-selection", "data"),
+        Input("signal", "data"),
+    ],
+)
+def gen_datatable_patient(row_id, json_data):
+    """
+    Draw the patient level data
+
+    :param      row_id:  the row selected from the side datatable
+    :param      data:        the patient data
+    """
+    # filter cols
+    COL_NAMES = [
+        {"name": v, "id": k} for k, v in conf.COLS.items() if k in conf.COLS_FULL
+    ]
+
+    # TODO: shouldn't need to do a roundtrip through a pandas dataframe
+    # filter the json data by the selected table row
+    df = pd.DataFrame.from_records(json_data)
+    df = df[df["id"] == row_id]  # must use tbl id
+    json_data = df.to_dict("records")
+
+    return [
+        dt.DataTable(
+            id="tbl-patient", columns=COL_NAMES, data=json_data, editable=False
+        )
+    ]
+
+
+@app.callback(
+    Output("datatable-side", "children"),
+    [
+        Input("signal", "data"),
+    ],
+)
+def gen_datatable_side(json_data):
+    COL_NAMES = [
+        {"name": v, "id": k} for k, v in conf.COLS.items() if k in conf.COLS_SIDEBAR
+    ]
+
+    return [
+        dt.DataTable(
+            id="tbl-side",
+            columns=COL_NAMES,
+            data=json_data,
+            editable=False,
+            # active_cell=True,
+            style_as_list_view=True,  # remove col lines
+            style_cell={
+                "fontSize": 12,
+                # 'font-family':'sans-serif',
+                "padding": "3px",
+            },
+            style_cell_conditional=[
+                {"if": {"column_id": "bay"}, "textAlign": "right"},
+                {"if": {"column_id": "bed"}, "textAlign": "left"},
+                {"if": {"column_id": "name"}, "textAlign": "left"},
+                {"if": {"column_id": "name"}, "fontWeight": "bolder"},
+            ],
+            style_data={"color": "black", "backgroundColor": "white"},
+            style_data_conditional=[
+                {"if": {"row_index": "odd"}, "backgroundColor": "rgb(220, 220, 220)"}
+            ],
+            sort_action="native",
+            cell_selectable=True,  # possible to click and navigate cells
+            row_selectable="single",
+        ),
+    ]
+
+
+@app.callback(
+    Output("polar-main", "figure"),
+    [
+        Input("tbl-side-selection", "data"),
+        Input("compass-picker", "value"),
+        Input("signal", "data"),
+    ],
+)
+def draw_fig_polar(row_id, team, data):
+    """
+    Draws a fig polar.
+
+    :param      'team':  result from switches picking which parts of the data to show
+    :type       'data':  { type_description }
+
+    :param      'data':  The data
+    :type       'data':  { type_description }
+    """
+
+    df = pd.DataFrame.from_records(data)
+    fig = go.Figure()
+
+    if not team:
+        # return emppty space if no team selected
+        return fig
+    else:
+        df = df[df.team.isin(team)]
+
+    # Prep discharge status
+    df['discharge_indicator'] = 0.0
+    df.loc[df.discharge_ready_1_4h == 'No', 'discharge_indicator'] = 0.0
+    df.loc[df.discharge_ready_1_4h == 'Yes', 'discharge_indicator'] = 1.0
+    df.loc[df.discharge_ready_1_4h == 'Review', 'discharge_indicator'] = 0.5
+
+    # set up markers for empty beds
+    df['marker_size'] = 0
+    df.loc[df['wim_1'].notna(), 'marker_size'] = 20 + df[["wim_1", "wim_r"]].max(axis=1) * 5
+
+    # set up text for markers
+    mask = df['vent_type_1_4h'].isin(wng.VENTILATOR_ACRONYMS.keys())
+    df['marker_text'] = ""
+    df.loc[mask, 'marker_text'] = df.loc[mask, 'vent_type_1_4h'].map(wng.VENTILATOR_ACRONYMS)
+
+    fig.add_trace(
+        go.Scatterpolar(
+
+            mode="markers+text",
+            name="",  # names the 'trace'
+
+            # ward bed
+            theta=df["bed"],
+
+            # marker radial position indicates discharge status
+            # edge = escape ; centre = plughole / not ready
+            r=df['discharge_indicator'],
+            marker_line_color=df["discharge_indicator"],
+            marker_line_width=2 + df["discharge_indicator"] * 4,
+
+            # inner color indicates severity of illness/work
+            marker_color="#FFF",
+            marker_size=df['marker_size'],
+
+            # text indicates WIM
+            # text=df[["wim_1", "wim_r"]].max(axis=1),
+            text = df['marker_text'],
+
+            # hoverinfo='all'
+            hovertemplate="Discharge: %{r} Bed: %{theta}",
+            # hovertemplate="%{}",
+        )
+    )
+
+    # update layout
+    fig.update_layout(margin=dict(t=20, b=20, l=20, r=20))
+
+    # update polar plot
+    fig.update_polars(bgcolor="#FFF")
+
+    # scale the 'hole' so that markers don't overlap when at baseline
+    fig.update_polars(hole=0.70)  # fraction of radius to remove
+
+    fig.update_polars(angularaxis_layer="below traces") #  so markers are above grid lines
+    fig.update_polars(angularaxis_showgrid=True)
+    fig.update_polars(angularaxis_showline=False)
+    fig.update_polars(angularaxis_gridcolor="#EBEBEB")
+    # tick combination below leaves nice space around angular lines
+    fig.update_polars(angularaxis_ticks="outside")  # "" not ticks or "outside" or "inside"
+    fig.update_polars(angularaxis_tickcolor="#FFF") # tick color match backgrund
+    fig.update_polars(angularaxis_direction="clockwise")
+
+    fig.update_polars(radialaxis_layer="below traces") #  so markers are above grid lines
+    fig.update_polars(radialaxis_showgrid=False)  # removes grid
+    fig.update_polars(radialaxis_showline=False)
+    fig.update_polars(radialaxis_ticks="")  # do not draw the tickss
+    fig.update_polars(radialaxis_showticklabels=False)  # removes axis labels
+
+
+    # FIXME: enhancement: can't get this to work
+    # nice example https://pyquestions.com/plotly-including-additional-data-in-hovertemplate
+    # possible explanatoin
+    # customdata = np.stack(df.mrn)
+    # fig.update_traces(customdata=customdata, hovertemplate='MRN: %{customdata[0]}')
+
+    # set up colors for identifying d/c
+    # https://plotly.com/python/reference/scatterpolar/#scatterpolar-marker-colorscale
+    fig.update_traces(marker_symbol="circle")
+    # color the marker centre
+    fig.update_traces(marker_colorscale=[
+        [0, 'rgb(255, 118, 0 )'],
+        [1, 'rgb(255, 0, 0 )'],
+        ])
+
+    # color the marker line (discharge)
+    fig.update_traces(marker_line_colorscale=[
+        [0.0, 'rgb(255,69,58)'],
+        [0.5, 'rgb(255, 118, 0)'],
+        [1.0, 'rgb(15,136,0)'],
+        ])
+
+    fig.update_traces(textfont_size=10)
+
+    dfi = df.reset_index(drop=True)
+
+    if row_id and row_id in list(dfi.bed_code):
+        row_num = dfi[dfi["id"] == row_id].index[0]
+        row_nums = []
+        row_nums.append(row_num)
+        fig.update_traces(selectedpoints=row_nums, selector=dict(type="scatterpolar"))
+        fig.update_traces(selected_marker_opacity=1, selector=dict(type="scatterpolar"))
+        fig.update_traces(unselected_marker_opacity=0.5, selector=dict(type="scatterpolar"))
+        fig.update_traces(
+            selected_textfont_color="black", selector=dict(type="scatterpolar")
+        )
+
+    return fig
+
+
+@app.callback(Output("occ-graduated-bar", "children"), Input("signal", "data"))
+def gen_graduated_bar_occ(json_data, occ_max=35):
+    """
+    Generates the graduated bar summarising current occupancy
+
+    :param      json_data:  json representation of the current dataframe
+    :type       json_data:  { type_description }
+    """
+    df = pd.DataFrame.from_records(json_data)
+
+    occ = df.mrn.count()
+    occ_scaled = occ / occ_max * 10
+
+    res = daq.GraduatedBar(
+        color={
+            "gradient": True,
+            "ranges": {"green": [0, 4], "yellow": [4, 7], "red": [7, 10]},
+        },
+        showCurrentValue=True,
+        # vertical=True,
+        value=occ_scaled,
+    )
+
+    return res
+
+
+@app.callback(Output("wim-graduated-bar", "children"), Input("signal", "data"))
+def gen_graduated_bar_wim(json_data, wim_max=175):
+    """
+    Generates the graduated bar summarising current work intensity
+    Assumes the max possible is ?5x the number number of beds
+
+    :param      json_data:  json representation of the current dataframe
+    :type       json_data:  { type_description }
+    """
+    df = pd.DataFrame.from_records(json_data)
+
+    wim_sum = df[["wim_1", "wim_r"]].max(axis=1).sum()
+    wim_sum_scaled = wim_sum / wim_max * 10
+
+    res = daq.GraduatedBar(
+        color={
+            "gradient": True,
+            "ranges": {"green": [0, 4], "yellow": [4, 7], "red": [7, 10]},
+        },
+        showCurrentValue=True,
+        # vertical=True,
+        value=wim_sum_scaled,
+    )
+
+    return res
+
+
+@app.callback(
+    Output("msg", "children"),
+    [
+        Input("tbl-side-selection", "data"),
+    ],
+)
+def gen_msg(active_row):
+    if not active_row:
+        res = """Click the table"""
+
+    res = str(active_row)
+    res = f"Selected row id is {res}"
+    return res
+
+
+@app.callback(
+    Output("tbl-side-selection", "data"),
+    Input("tbl-side", "derived_virtual_selected_row_ids"),
+    State("signal", "data"),
+)
+def get_datatable_side_selected_row(row_id, json_data):
+    """
+    returns the 'row_id' selected from the datatable (side bar)
+    if nothing selected then returns the first row
+    """
+    if not row_id:
+        row_id = json_data[0]["id"]
+    else:
+        row_id = row_id[0]
+    return row_id
