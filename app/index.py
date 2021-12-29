@@ -8,6 +8,7 @@ from dash import Input, Output, dcc, html
 from app_sitrep import sitrep
 from app_debug import debug
 from app_covid import covid
+from app_ed import ed
 from landing import landing
 
 from app import app
@@ -30,6 +31,8 @@ def display_page(pathname):
         return sitrep
     elif pathname == "/covid":
         return covid
+    elif pathname == "/ed":
+        return ed
     elif pathname == "/debug":
         return debug
     elif pathname == "/":
