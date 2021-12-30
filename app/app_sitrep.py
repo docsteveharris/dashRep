@@ -20,14 +20,25 @@ conf = ConfigFactory.factory()
 
 
 # TODO n_intervals arg is unused but just ensures that store data updates
-@app.callback(Output("signal", "data"), Input("interval-data", "n_intervals"))
-def update_data_from_source(n_intervals):
+@app.callback(
+    Output("signal", "data"),
+    [
+        Input("interval-data", "n_intervals"),
+        Input("icu_active", "data"),
+    ],
+)
+def update_data_from_source(n_intervals, icu):
     """
     stores the data in a dcc.Store
     runs on load and will be triggered each time the table is updated or the REFRESH_INTERVAL elapses
     """
-    df_sitrep = wng.get_hylode_data(conf.HYLODE_ICU_LIVE, dev=conf.DEV_HYLODE)
-    df_census = wng.get_hylode_data(conf.HYLODE_EMAP_CENSUS, dev=conf.DEV_HYLODE)
+    print(f"Updating data for {icu}")
+    # prepare the URL
+    url_icu = wng.gen_hylode_url("sitrep", icu)
+    url_census = wng.gen_hylode_url("census", icu)
+
+    df_sitrep = wng.get_hylode_data(url_icu, dev=conf.DEV_HYLODE)
+    df_census = wng.get_hylode_data(url_census, dev=conf.DEV_HYLODE)
     df_hylode = wng.merge_census_data(df_sitrep, df_census, dev=conf.DEV_HYLODE)
     ward = df_hylode["ward_code"][0]
     df_user = wng.get_user_data(conf.USER_DATA_SOURCE, dev=conf.DEV_USER)
@@ -39,52 +50,61 @@ def update_data_from_source(n_intervals):
 
 @app.callback(
     Output("datatable-main", "children"),
-    [
-        Input("signal", "data"),
-    ],
+    Input("signal", "data"),
+    State("icu_active", "data"),
 )
-def gen_datatable_main(json_data):
+def gen_datatable_main(json_data, icu):
+    print(f"Working with {icu}")
     COL_NAMES = [
         {"name": v, "id": k} for k, v in conf.COLS.items() if k in conf.COLS_FULL
     ]
 
     return [
         dbc.Container(
-        dt.DataTable(
-            id="tbl-main",
-            columns=COL_NAMES,
-            data=json_data,
-            editable=False,
-            # active_cell=True,
-            # style_as_list_view=True,  # remove col lines
-            style_cell={
-                "fontSize": 12,
-                # 'font-family':'sans-serif',
-                "padding": "3px",
-            },
-            style_cell_conditional=[
-                {"if": {"column_id": "bay"}, "textAlign": "right"},
-                {"if": {"column_id": "bed"}, "textAlign": "left"},
-                {"if": {"column_id": "name"}, "textAlign": "left"},
-                {"if": {"column_id": "name"}, "fontWeight": "bolder"},
-            ],
-            style_data={"color": "black", "backgroundColor": "white"},
-            # striped rows
-            style_data_conditional=[
-                {"if": {"row_index": "odd"}, "backgroundColor": "rgb(220, 220, 220)"}
-            ],
-            sort_action="native",
-            cell_selectable=True,  # possible to click and navigate cells
-            # row_selectable="single",
-        ),
-        # className="dbc",
+            dt.DataTable(
+                id="tbl-main",
+                columns=COL_NAMES,
+                data=json_data,
+                editable=False,
+                # active_cell=True,
+                # style_as_list_view=True,  # remove col lines
+                style_cell={
+                    "fontSize": 12,
+                    # 'font-family':'sans-serif',
+                    "padding": "3px",
+                },
+                style_cell_conditional=[
+                    {"if": {"column_id": "bay"}, "textAlign": "right"},
+                    {"if": {"column_id": "bed"}, "textAlign": "left"},
+                    {"if": {"column_id": "name"}, "textAlign": "left"},
+                    {"if": {"column_id": "name"}, "fontWeight": "bolder"},
+                ],
+                style_data={"color": "black", "backgroundColor": "white"},
+                # striped rows
+                style_data_conditional=[
+                    {
+                        "if": {"row_index": "odd"},
+                        "backgroundColor": "rgb(220, 220, 220)",
+                    }
+                ],
+                sort_action="native",
+                cell_selectable=True,  # possible to click and navigate cells
+                # row_selectable="single",
+            ),
+            # className="dbc",
         )
     ]
 
 
-@app.callback(Output("icu_active", "children"), Input("icu_radio", "value"))
-def display_value(value):
-    return f"Selected value: {value}"
+@app.callback(Output("icu_active", "data"), Input("icu_radio", "value"))
+def store_icu_active(value):
+    print(f"Storing active ICU as {value.lower()}")
+    return value.lower()
+
+
+@app.callback(Output("which_icu", "children"), Input("icu_active", "data"))
+def display_icu_active(value):
+    return html.H3(f"You are inspecting {value.upper()}")
 
 
 """
@@ -117,7 +137,7 @@ icu_radio_button = html.Div(
                 )
             ],
         ),
-        html.Div(id="icu_active"),
+        # html.Div(id="which_icu"),
     ],
     className="radio-group",
 )
@@ -131,8 +151,8 @@ main = dbc.Container(
             [
                 dbc.Col(
                     [
-                        html.I(className="fa fa-lungs-virus"),
-                        html.P("Placeholder initial text"),
+                        html.Div(id="which_icu"),
+                        # html.I(className="fa fa-lungs-virus"),
                     ],
                     width={"order": "first", "width": True},
                 ),
@@ -189,6 +209,8 @@ main = dbc.Container(
 dash_only = html.Div(
     [
         dcc.Interval(id="interval-data", interval=conf.REFRESH_INTERVAL, n_intervals=0),
+        # which ICU?
+        dcc.Store(id="icu_active"),
         # use this to signal when the data changes
         dcc.Store(id="signal"),
         # dcc.Store(id="tbl-active-row"),

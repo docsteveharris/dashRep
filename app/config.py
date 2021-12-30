@@ -87,9 +87,9 @@ class Production(Config):
     # Use the IP address b/c slow on DNS resolution
     # e.g. HYLODE_ICU_LIVE = 'http://uclvlddpragae08:5006/icu/live/T06/ui'
     # sitrep data
-    HYLODE_ICU_LIVE = "http://172.16.149.205:5006/icu/live/T03/ui"
+    HYLODE_ICU_LIVE = "http://172.16.149.205:5006/icu/live/{ward}/ui"
     # census data
-    HYLODE_EMAP_CENSUS = "http://172.16.149.205:5006/emap/census/T03/"
+    HYLODE_EMAP_CENSUS = "http://172.16.149.205:5006/emap/census/{ward}/"
 
     DEV_USER = True
     USER_DATA_SOURCE = Path("data/user_edits.csv")
@@ -98,11 +98,11 @@ class Production(Config):
 class Development(Config):
     DEV = True
     DEV_HYLODE = True
-    HYLODE_ICU_LIVE = Path("data/icu.json")
-    HYLODE_EMAP_CENSUS = Path("data/census.json")
+    HYLODE_ICU_LIVE = "data/icu_{ward}.json"
+    HYLODE_EMAP_CENSUS = "data/census_{ward}.json"
 
     DEV_USER = True
-    USER_DATA_SOURCE = Path("data/user_edits.csv")
+    USER_DATA_SOURCE = "data/user_edits.csv"
 
 
 header = dbc.Container(

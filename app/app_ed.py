@@ -9,8 +9,6 @@ import wrangle as wng
 
 conf = ConfigFactory.factory()
 
-df_sitrep = wng.get_hylode_data(conf.HYLODE_ICU_LIVE, dev=conf.DEV_HYLODE)
-df_census = wng.get_hylode_data(conf.HYLODE_EMAP_CENSUS, dev=conf.DEV_HYLODE)
 
 ed = html.Div([
     html.H1('Emergency Department data'),

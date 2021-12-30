@@ -10,7 +10,7 @@ app = dash.Dash(
     title="HYLODE",
     update_title=None,
     external_stylesheets=[
-        dbc.themes.MORPH,
+        dbc.themes.LUMEN,
         dbc.icons.FONT_AWESOME,
     ],
     suppress_callback_exceptions=True,

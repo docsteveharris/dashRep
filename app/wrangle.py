@@ -2,13 +2,16 @@
 Data management for the app
 Factored out here to make the flow of the code in the app easier to follow
 """
-import warnings
 import json
+import warnings
 
+import arrow
 import numpy as np
 import pandas as pd
 import requests
-import arrow
+from config import ConfigFactory
+
+conf = ConfigFactory.factory()
 
 VENTILATOR_ACRONYMS = {
     "Room air": "RA",
@@ -16,14 +19,28 @@ VENTILATOR_ACRONYMS = {
     "Ventilated": "MV",
     "Unknown": "?",
     "HFNO": "HF",
-    "CPAP": "CP"
+    "CPAP": "CP",
 }
-
 
 
 def prep_cols_for_table(df, cols):
     list_of_cols = [{"name": i, "id": i} for i in df.columns if i in cols.keys()]
     return list_of_cols
+
+
+def gen_hylode_url(url, ward):
+    ward = ward.lower()
+    if url == "sitrep":
+        res = conf.HYLODE_ICU_LIVE
+        res = res.format(ward=ward)
+        print(res)
+    elif url == "census":
+        res = conf.HYLODE_EMAP_CENSUS
+        res = res.format(ward=ward)
+        print(res)
+    else:
+        raise NotImplementedError
+    return res
 
 
 def get_hylode_data(file_or_url: str, dev: bool = False) -> pd.DataFrame:
@@ -46,30 +63,34 @@ def get_hylode_data(file_or_url: str, dev: bool = False) -> pd.DataFrame:
     return df
 
 
-def merge_census_data(sitrep: pd.DataFrame, census: pd.DataFrame, dev: bool = False) -> pd.DataFrame:
+def merge_census_data(
+    sitrep: pd.DataFrame, census: pd.DataFrame, dev: bool = False
+) -> pd.DataFrame:
     """
     Cleans sitrep info to ensure that only patients currently in census are reported
-    
+
     :param      sitrep:  dataframe containing sitrep info
     :param      census:  dataframe containing census info
-    
+
     :returns:   { description_of_the_return_value }
     """
     if dev:
         # MRNs won't be in sycn if dev; just screen on beds
-        census = census[['ward_code', 'bay_code', 'bed_code']]
-        df = census.merge(sitrep, how='left')
+        census = census[["ward_code", "bay_code", "bed_code"]]
+        df = census.merge(sitrep, how="left")
     else:
         # WARN?: assumes that mrn does not change *during* the admission
-        census = census[['mrn','ward_code', 'bay_code', 'bed_code']]
+        census = census[["mrn", "ward_code", "bay_code", "bed_code"]]
         # merge on beds and mrn
-        df = census.merge(sitrep, how='left')
+        df = census.merge(sitrep, how="left")
 
         chk = merge_census_data(sitrep, census, dev=True).csn.isna().sum()
         if chk:
             # now check that csn is not missing as a way of warning about non-merges
-            warnings.warn(f'***FIXME: merge sitrep onto census left {chk} beds without data')
-        
+            warnings.warn(
+                f"***FIXME: merge sitrep onto census left {chk} beds without data"
+            )
+
     return df
 
 
@@ -85,7 +106,7 @@ def get_user_data(file_or_url: str, dev: bool = False) -> pd.DataFrame:
         raise NotImplementedError
 
 
-def get_bed_skeleton(ward: str, file_or_url, dev: bool = False) -> pd.DataFrame:
+def get_bed_skeleton(ward: str, file_or_url: str, dev: bool = False) -> pd.DataFrame:
     """
     Gets the ward skeleton.
     Uses the valid_from column to drop invalid teams
@@ -96,13 +117,15 @@ def get_bed_skeleton(ward: str, file_or_url, dev: bool = False) -> pd.DataFrame:
     :returns:   The ward skeleton.
     :rtype:     pd.DataFrame
     """
-    if dev or 'T03' == ward:
-        warnings.warn('***FIXME: need to properly implement a database of ward structures')
+    if dev or "T03" == ward:
+        warnings.warn(
+            "***FIXME: need to properly implement a database of ward structures"
+        )
         df = pd.read_csv(file_or_url)
         # keep only those rows where valid_to is missing
-        df[df['valid_to'].isna()]
+        df[df["valid_to"].isna()]
         # TODO: check for dups
-        df.drop('valid_to', axis=1, inplace=True)
+        df.drop("valid_to", axis=1, inplace=True)
         return df
     else:
         raise NotImplementedError
@@ -121,12 +144,12 @@ def merge_hylode_user_data(df_skeleton, df_hylode, df_user) -> pd.DataFrame:
     return df
 
 
-def isots_str2fmt(s: str, format='HH:mm DD MMM YY') -> str:
+def isots_str2fmt(s: str, format="HH:mm DD MMM YY") -> str:
     """
     Convert from ISO formatted timestamp as string to alternative format
     Handles nulls or NaNs
-    """ 
-    
+    """
+
     if s in ["NaN", np.NaN] or not s:
         return ""
     else:

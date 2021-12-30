@@ -9,8 +9,13 @@ import wrangle as wng
 
 conf = ConfigFactory.factory()
 
-df_sitrep = wng.get_hylode_data(conf.HYLODE_ICU_LIVE, dev=conf.DEV_HYLODE)
-df_census = wng.get_hylode_data(conf.HYLODE_EMAP_CENSUS, dev=conf.DEV_HYLODE)
+DEBUG_ICU = "T03"
+
+url_icu = wng.gen_hylode_url("sitrep", DEBUG_ICU)
+df_sitrep = wng.get_hylode_data(url_icu, dev=conf.DEV_HYLODE)
+
+url_census = wng.gen_hylode_url("census", DEBUG_ICU)
+df_census = wng.get_hylode_data(url_census, dev=conf.DEV_HYLODE)
 
 debug = html.Div([
     html.P('Sitrep data only (before joining on to census data'),
