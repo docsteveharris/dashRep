@@ -21,7 +21,7 @@ conf = ConfigFactory.factory()
 
 # TODO n_intervals arg is unused but just ensures that store data updates
 @app.callback(
-    Output("signal", "data"),
+    Output("table-data", "data"),
     [
         Input("interval-data", "n_intervals"),
         Input("icu_active", "data"),
@@ -49,24 +49,53 @@ def update_data_from_source(n_intervals, icu):
 
 
 @app.callback(
+    Output("tbl-main", "data"),
+    Input("tbl-main", "data_timestamp"),
+    State("tbl-main", "data"),
+)
+def update_table(timestamp, rows):
+    for i, row in enumerate(rows):
+        if i == 2:
+            print(row)
+    return rows
+
+
+@app.callback(
     Output("datatable-main", "children"),
-    Input("signal", "data"),
+    Input("table-data", "data"),
     State("icu_active", "data"),
 )
 def gen_datatable_main(json_data, icu):
     print(f"Working with {icu}")
-    COL_NAMES = [
+    COL_DICT = [
         {"name": v, "id": k} for k, v in conf.COLS.items() if k in conf.COLS_FULL
     ]
+
+    cols_to_edit = ["wim_1", "discharge_ready_1_4h"]
+    COL_DICT = [
+        dict(editable=True, presentation="dropdown", **i)
+        if i["id"] in cols_to_edit
+        else i
+        for i in COL_DICT
+    ]
+
+    DISCHARGE_OPTIONS = ["Ready", "No", "Review"]
 
     return [
         dbc.Container(
             dt.DataTable(
                 id="tbl-main",
-                columns=COL_NAMES,
+                columns=COL_DICT,
                 data=json_data,
                 editable=False,
-                # active_cell=True,
+                dropdown={
+                    "discharge_ready_1_4h": {
+                        "options": [
+                            {"label": i, "value": i} for i in DISCHARGE_OPTIONS
+                        ],
+                        "clearable": False,
+                    },
+                },
                 # style_as_list_view=True,  # remove col lines
                 style_cell={
                     "fontSize": 12,
@@ -78,6 +107,7 @@ def gen_datatable_main(json_data, icu):
                     {"if": {"column_id": "bed"}, "textAlign": "left"},
                     {"if": {"column_id": "name"}, "textAlign": "left"},
                     {"if": {"column_id": "name"}, "fontWeight": "bolder"},
+                    {"if": {"column_id": "discharge_ready_1_4h"}, "textAlign": "left"},
                 ],
                 style_data={"color": "black", "backgroundColor": "white"},
                 # striped rows
@@ -197,7 +227,7 @@ main = dbc.Container(
                     md=6,
                 ),
             ],
-            align="end",
+            align="start",
         ),
     ],
     fluid=True,
@@ -211,8 +241,8 @@ dash_only = html.Div(
         dcc.Interval(id="interval-data", interval=conf.REFRESH_INTERVAL, n_intervals=0),
         # which ICU?
         dcc.Store(id="icu_active"),
-        # use this to signal when the data changes
-        dcc.Store(id="signal"),
+        # use this to table-data when the data changes
+        dcc.Store(id="table-data"),
         # dcc.Store(id="tbl-active-row"),
         dcc.Store(id="tbl-side-selection"),
     ]
