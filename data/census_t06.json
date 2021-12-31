@@ -1,0 +1,189 @@
+[
+    {
+        "csn": "1086283204",
+        "mrn": "45762353",
+        "name": "Joseph Young",
+        "dob": "1948-10-13",
+        "sex": "M",
+        "ethnicity": [
+            "White British"
+        ],
+        "postcode": "39862",
+        "admission_dt": "2021-12-30T19:49:00+00:00",
+        "discharge_dt": null,
+        "bed_code": "BY10-46",
+        "bay_code": "BY10",
+        "bay_type": "Regular",
+        "ward_code": "T06"
+    },
+    {
+        "csn": "1002276826",
+        "mrn": "43619877",
+        "name": "Cody Chandler",
+        "dob": "1946-10-17",
+        "sex": "M",
+        "ethnicity": [
+            "Other White Background"
+        ],
+        "postcode": "45794",
+        "admission_dt": "2021-12-18T16:40:00+00:00",
+        "discharge_dt": null,
+        "bed_code": "BY10-47",
+        "bay_code": "BY10",
+        "bay_type": "Regular",
+        "ward_code": "T06"
+    },
+    {
+        "csn": "1050607773",
+        "mrn": "46640913",
+        "name": "James Solomon",
+        "dob": "1939-06-30",
+        "sex": "M",
+        "ethnicity": [
+            "White British"
+        ],
+        "postcode": "10075",
+        "admission_dt": "2021-12-27T14:19:00+00:00",
+        "discharge_dt": null,
+        "bed_code": "BY11-48",
+        "bay_code": "BY11",
+        "bay_type": "Regular",
+        "ward_code": "T06"
+    },
+    {
+        "csn": "1072102165",
+        "mrn": "41953513",
+        "name": "Eric Garcia",
+        "dob": "1937-03-16",
+        "sex": "M",
+        "ethnicity": [
+            "White British"
+        ],
+        "postcode": "59130",
+        "admission_dt": "2021-12-29T16:52:00+00:00",
+        "discharge_dt": null,
+        "bed_code": "BY11-49",
+        "bay_code": "BY11",
+        "bay_type": "Regular",
+        "ward_code": "T06"
+    },
+    {
+        "csn": "1013445685",
+        "mrn": "41365314",
+        "name": "Colton Velazquez",
+        "dob": "1922-07-24",
+        "sex": "M",
+        "ethnicity": [
+            "Black African"
+        ],
+        "postcode": "22522",
+        "admission_dt": "2021-12-31T06:44:00+00:00",
+        "discharge_dt": null,
+        "bed_code": "BY11-50",
+        "bay_code": "BY11",
+        "bay_type": "Regular",
+        "ward_code": "T06"
+    },
+    {
+        "csn": "1052809942",
+        "mrn": "41654472",
+        "name": "Anthony Griffith",
+        "dob": "1954-05-28",
+        "sex": "M",
+        "ethnicity": [
+            "Other Ethnic Group"
+        ],
+        "postcode": "70965",
+        "admission_dt": "2021-12-30T09:46:00+00:00",
+        "discharge_dt": null,
+        "bed_code": "BY12-51",
+        "bay_code": "BY12",
+        "bay_type": "Regular",
+        "ward_code": "T06"
+    },
+    {
+        "csn": "1059104265",
+        "mrn": "40734068",
+        "name": "Lance Parrish",
+        "dob": "1982-09-09",
+        "sex": "M",
+        "ethnicity": [
+            "White British"
+        ],
+        "postcode": "91322",
+        "admission_dt": "2021-12-23T22:58:00+00:00",
+        "discharge_dt": null,
+        "bed_code": "BY12-52",
+        "bay_code": "BY12",
+        "bay_type": "Regular",
+        "ward_code": "T06"
+    },
+    {
+        "csn": "1088257123",
+        "mrn": "49129937",
+        "name": "Ronnie Garcia",
+        "dob": "1948-03-10",
+        "sex": "M",
+        "ethnicity": [
+            "White British"
+        ],
+        "postcode": "74573",
+        "admission_dt": "2021-12-31T10:13:00+00:00",
+        "discharge_dt": null,
+        "bed_code": "BY12-53",
+        "bay_code": "BY12",
+        "bay_type": "Regular",
+        "ward_code": "T06"
+    },
+    {
+        "csn": "1032288756",
+        "mrn": "44423030",
+        "name": "Theodore Meza",
+        "dob": "1938-07-01",
+        "sex": "M",
+        "ethnicity": [
+            "White British"
+        ],
+        "postcode": "62737",
+        "admission_dt": "2021-12-23T22:52:00+00:00",
+        "discharge_dt": null,
+        "bed_code": "SR42-42",
+        "bay_code": "SR42",
+        "bay_type": "SideRoom",
+        "ward_code": "T06"
+    },
+    {
+        "csn": "1093774400",
+        "mrn": "45671359",
+        "name": "Christopher Phillips",
+        "dob": "2014-09-02",
+        "sex": "M",
+        "ethnicity": [
+            "Black African"
+        ],
+        "postcode": "42089",
+        "admission_dt": "2021-12-29T12:18:00+00:00",
+        "discharge_dt": null,
+        "bed_code": "SR43-43",
+        "bay_code": "SR43",
+        "bay_type": "SideRoom",
+        "ward_code": "T06"
+    },
+    {
+        "csn": "1047044872",
+        "mrn": "44258624",
+        "name": "Howard Williams",
+        "dob": "1953-09-05",
+        "sex": "M",
+        "ethnicity": [
+            "White British"
+        ],
+        "postcode": "27198",
+        "admission_dt": "2021-12-15T14:50:00+00:00",
+        "discharge_dt": null,
+        "bed_code": "SR44-44",
+        "bay_code": "SR44",
+        "bay_type": "SideRoom",
+        "ward_code": "T06"
+    }
+]

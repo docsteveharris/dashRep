@@ -117,18 +117,14 @@ def get_bed_skeleton(ward: str, file_or_url: str, dev: bool = False) -> pd.DataF
     :returns:   The ward skeleton.
     :rtype:     pd.DataFrame
     """
-    if dev or "T03" == ward:
-        warnings.warn(
-            "***FIXME: need to properly implement a database of ward structures"
-        )
-        df = pd.read_csv(file_or_url)
-        # keep only those rows where valid_to is missing
-        df[df["valid_to"].isna()]
-        # TODO: check for dups
-        df.drop("valid_to", axis=1, inplace=True)
-        return df
-    else:
-        raise NotImplementedError
+    warnings.warn("***FIXME: need to properly implement a database of ward structures")
+    df = pd.read_csv(file_or_url)
+    df = df[df["ward_code"].str.lower() == ward]
+    # keep only those rows where valid_to is missing
+    df[df["valid_to"].isna()]
+    # TODO: check for dups
+    df.drop("valid_to", axis=1, inplace=True)
+    return df
 
 
 def merge_hylode_user_data(df_skeleton, df_hylode, df_user) -> pd.DataFrame:

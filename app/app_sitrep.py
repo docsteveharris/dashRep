@@ -32,7 +32,8 @@ def update_data_from_source(n_intervals, icu):
     stores the data in a dcc.Store
     runs on load and will be triggered each time the table is updated or the REFRESH_INTERVAL elapses
     """
-    print(f"Updating data for {icu}")
+    icu = icu.lower()
+    print(f"Updating data for {icu.upper()}")
     # prepare the URL
     url_icu = wng.gen_hylode_url("sitrep", icu)
     url_census = wng.gen_hylode_url("census", icu)
@@ -40,9 +41,8 @@ def update_data_from_source(n_intervals, icu):
     df_sitrep = wng.get_hylode_data(url_icu, dev=conf.DEV_HYLODE)
     df_census = wng.get_hylode_data(url_census, dev=conf.DEV_HYLODE)
     df_hylode = wng.merge_census_data(df_sitrep, df_census, dev=conf.DEV_HYLODE)
-    ward = df_hylode["ward_code"][0]
     df_user = wng.get_user_data(conf.USER_DATA_SOURCE, dev=conf.DEV_USER)
-    df_skeleton = wng.get_bed_skeleton(ward, conf.SKELETON_DATA_SOURCE, dev=conf.DEV)
+    df_skeleton = wng.get_bed_skeleton(icu, conf.SKELETON_DATA_SOURCE, dev=conf.DEV)
     df_orig = wng.merge_hylode_user_data(df_skeleton, df_hylode, df_user)
     df = wng.wrangle_data(df_orig, conf.COLS)
     return df.to_dict("records")
