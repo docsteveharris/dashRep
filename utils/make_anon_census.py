@@ -1,6 +1,6 @@
 # run this script from the datascience desktop to deidentify sample data
 # secrets is excluded from git etc
-# expects a single json file from the icu/live API
+# expects a single json file from the emap/census API
 # e.g
 # curl -X 'GET' \
   # 'http://uclvlddpragae08:5006/emap/census/T03/' \
@@ -11,12 +11,21 @@ import json
 from pathlib import Path
 from datetime import datetime, date
 import random
+import argparse
 
 from faker import Faker
 
+parser = argparse.ArgumentParser(description="Anonymise data from emap/census API")
+parser.add_argument('unit', type=str, help='Unit name: one of T03,T06')
+args = parser.parse_args()
+
+unit = args.unit.lower()
+units = [i.lower() for i in ['T03', 'T06']]
+assert unit in units 
+
 fake = Faker()
 
-with Path('data/secret/census.json').open() as f:
+with Path(f'data/secret/census_{unit}.json').open() as f:
     persons = json.load(f)
     persons = persons['data']
 
@@ -58,5 +67,5 @@ for person in persons:
 # TODO Assert that change the content of the supplied JSON sampe but does NOT
 # change the structure
 
-with Path('data/census.json').open('w') as f:
+with Path(f'data/census_{unit}.json').open('w') as f:
     json.dump(persons, f, indent=4)

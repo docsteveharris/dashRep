@@ -10,12 +10,20 @@
 import json
 from pathlib import Path
 from datetime import datetime, date
-
+import argparse
 from faker import Faker
+
+parser = argparse.ArgumentParser(description="Anonymise data from ICU/Live API")
+parser.add_argument('unit', type=str, help='Unit name: one of T03,T06')
+args = parser.parse_args()
+
+unit = args.unit.lower()
+units = [i.lower() for i in ['T03', 'T06']]
+assert unit in units 
 
 fake = Faker()
 
-with Path('data/secret/icu.json').open() as f:
+with Path(f'data/secret/icu_{unit}.json').open() as f:
     persons = json.load(f)
     persons = persons['data']
 
@@ -57,5 +65,5 @@ for person in persons:
 # TODO Assert that change the content of the supplied JSON sampe but does NOT
 # change the structure
 
-with Path('data/icu.json').open('w') as f:
+with Path(f'data/icu_{unit}.json').open('w') as f:
     json.dump(persons, f, indent=4)
