@@ -28,28 +28,28 @@ cache = Cache(
 TIMEOUT = 60 * 60  # measured in seconds
 
 
-# TODO n_intervals arg is unused but just ensures that store data updates
 @app.callback(
-    Output("table-data", "data"),
-    [
-        Input("interval-data", "n_intervals"),
-        Input("icu_active", "data"),
-        Input("tbl-save", "n_clicks"),
-        Input("tbl-reset", "n_clicks"),
-    ],
-    State("tbl-main", "data"),
+    output=dict(json_data=Output("table-data", "data")), # output data to store
+    inputs=dict(
+        tbl_data=State("tbl-main", "data"),
+        icu=Input("icu_active", "data"),
+        intervals=Input("interval-data", "n_intervals"),
+        save_btn=Input("tbl-save", "n_clicks"),
+        reset_btn=Input("tbl-reset", "n_clicks"),
+    ),
     prevent_initial_call=True,  # suppress_callback_exceptions does not work
 )
 @cache.memoize(timeout=TIMEOUT)
-def update_data_from_source(n_intervals, icu, save_n, reset_n, foo_data):
+def data_io(tbl_data, icu, save_btn, reset_btn, intervals):
     """
     stores the data in a dcc.Store
     runs on load and will be triggered each time the table is updated or the REFRESH_INTERVAL elapses
     """
+
     icu = icu.lower()
     print(f"Updating data for {icu.upper()}")
-    print(f"Save button value was {save_n}")
-    print(f"Reset button value was {reset_n}")
+    print(f"Save button value was {save_btn}")
+    print(f"Reset button value was {reset_btn}")
     # prepare the URL
     url_icu = wng.gen_hylode_url("sitrep", icu)
     url_census = wng.gen_hylode_url("census", icu)
@@ -61,7 +61,7 @@ def update_data_from_source(n_intervals, icu, save_n, reset_n, foo_data):
     df_skeleton = wng.get_bed_skeleton(icu, conf.SKELETON_DATA_SOURCE, dev=conf.DEV)
     df_orig = wng.merge_hylode_user_data(df_skeleton, df_hylode, df_user)
     df = wng.wrangle_data(df_orig, conf.COLS)
-    return df.to_dict("records")
+    return dict(json_data=df.to_dict("records"))
 
 
 @app.callback(
