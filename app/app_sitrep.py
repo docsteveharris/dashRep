@@ -19,6 +19,14 @@ from app import app
 
 conf = ConfigFactory.factory()
 
+from flask_caching import Cache
+
+cache = Cache(
+    app.server, config={"CACHE_TYPE": "filesystem", "CACHE_DIR": "cache-directory"}
+)
+
+TIMEOUT = 60 * 60  # measured in seconds
+
 
 # TODO n_intervals arg is unused but just ensures that store data updates
 @app.callback(

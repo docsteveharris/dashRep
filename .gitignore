@@ -20,6 +20,7 @@ Untitled.ipynb
 labbooks/*
 
 # caches
+cache-directory/*
 *.swp
 __pycache__/
 *.py[cod]
