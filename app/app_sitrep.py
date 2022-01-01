@@ -2,11 +2,12 @@
 Functions (callbacks) that provide the functionality
 """
 import json
+import numpy as np
+import pandas as pd
+import utils
 
 import dash_bootstrap_components as dbc
 import dash_daq as daq
-import numpy as np
-import pandas as pd
 import plotly.graph_objects as go
 import wrangle as wng
 from config import ConfigFactory, footer, header, nav
@@ -67,63 +68,63 @@ def update_table(timestamp, rows):
 )
 def gen_datatable_main(json_data, icu):
     print(f"Working with {icu}")
-    COL_DICT = [
-        {"name": v, "id": k} for k, v in conf.COLS.items() if k in conf.COLS_FULL
-    ]
+    COL_DICT = [ {"name": v, "id": k} for k, v in conf.COLS.items() if k in conf.COLS_FULL ]
 
-    cols_to_edit = ["wim_1", "discharge_ready_1_4h"]
-    COL_DICT = [
-        dict(editable=True, presentation="dropdown", **i)
-        if i["id"] in cols_to_edit
-        else i
-        for i in COL_DICT
-    ]
+    # updates b/c list are mutable
+    utils.deep_update(utils.get_dict_from_list(COL_DICT, "id", "wim_1"), dict(editable=True))
+    utils.deep_update(utils.get_dict_from_list(COL_DICT, "id", "discharge_ready_1_4h"), dict(editable=True))
+    utils.deep_update(utils.get_dict_from_list(COL_DICT, "id", "discharge_ready_1_4h"), dict(presentation="dropdown"))
+
 
     DISCHARGE_OPTIONS = ["Ready", "No", "Review"]
 
-    return [
+    dto = (
+        dt.DataTable(
+            id="tbl-main",
+            columns=COL_DICT,
+            data=json_data,
+            editable=False,
+            dropdown={
+                "discharge_ready_1_4h": {
+                    "options": [{"label": i, "value": i} for i in DISCHARGE_OPTIONS],
+                    "clearable": False,
+                },
+            },
+            # style_as_list_view=True,  # remove col lines
+            style_cell={
+                "fontSize": 12,
+                # 'font-family':'sans-serif',
+                "padding": "3px",
+            },
+            style_cell_conditional=[
+                {"if": {"column_id": "bay"}, "textAlign": "right"},
+                {"if": {"column_id": "bed"}, "textAlign": "left"},
+                {"if": {"column_id": "name"}, "textAlign": "left"},
+                {"if": {"column_id": "name"}, "fontWeight": "bolder"},
+                {"if": {"column_id": "discharge_ready_1_4h"}, "textAlign": "left"},
+            ],
+            style_data={"color": "black", "backgroundColor": "white"},
+            # striped rows
+            style_data_conditional=[
+                {
+                    "if": {"row_index": "odd"},
+                    "backgroundColor": "rgb(220, 220, 220)",
+                }
+            ],
+            sort_action="native",
+            cell_selectable=True,  # possible to click and navigate cells
+            # row_selectable="single",
+        ),
+    )
+
+    # wrap in container
+    dto = [
         dbc.Container(
-            dt.DataTable(
-                id="tbl-main",
-                columns=COL_DICT,
-                data=json_data,
-                editable=False,
-                dropdown={
-                    "discharge_ready_1_4h": {
-                        "options": [
-                            {"label": i, "value": i} for i in DISCHARGE_OPTIONS
-                        ],
-                        "clearable": False,
-                    },
-                },
-                # style_as_list_view=True,  # remove col lines
-                style_cell={
-                    "fontSize": 12,
-                    # 'font-family':'sans-serif',
-                    "padding": "3px",
-                },
-                style_cell_conditional=[
-                    {"if": {"column_id": "bay"}, "textAlign": "right"},
-                    {"if": {"column_id": "bed"}, "textAlign": "left"},
-                    {"if": {"column_id": "name"}, "textAlign": "left"},
-                    {"if": {"column_id": "name"}, "fontWeight": "bolder"},
-                    {"if": {"column_id": "discharge_ready_1_4h"}, "textAlign": "left"},
-                ],
-                style_data={"color": "black", "backgroundColor": "white"},
-                # striped rows
-                style_data_conditional=[
-                    {
-                        "if": {"row_index": "odd"},
-                        "backgroundColor": "rgb(220, 220, 220)",
-                    }
-                ],
-                sort_action="native",
-                cell_selectable=True,  # possible to click and navigate cells
-                # row_selectable="single",
-            ),
-            # className="dbc",
+            dto,
+            className="dbc",
         )
     ]
+    return dto
 
 
 @app.callback(Output("icu_active", "data"), Input("icu_radio", "value"))
