@@ -2,12 +2,11 @@
 Functions (callbacks) that provide the functionality
 """
 import json
-import numpy as np
-import pandas as pd
-import utils
 
 import dash_bootstrap_components as dbc
 import dash_daq as daq
+import numpy as np
+import pandas as pd
 import plotly.graph_objects as go
 import wrangle as wng
 from config import ConfigFactory, footer, header, nav
@@ -15,6 +14,7 @@ from dash import Dash, Input, Output, State
 from dash import dash_table as dt
 from dash import dcc, html
 
+import utils
 from app import app
 
 conf = ConfigFactory.factory()
@@ -68,13 +68,22 @@ def update_table(timestamp, rows):
 )
 def gen_datatable_main(json_data, icu):
     print(f"Working with {icu}")
-    COL_DICT = [ {"name": v, "id": k} for k, v in conf.COLS.items() if k in conf.COLS_FULL ]
+    COL_DICT = [
+        {"name": v, "id": k} for k, v in conf.COLS.items() if k in conf.COLS_FULL
+    ]
 
     # updates b/c list are mutable
-    utils.deep_update(utils.get_dict_from_list(COL_DICT, "id", "wim_1"), dict(editable=True))
-    utils.deep_update(utils.get_dict_from_list(COL_DICT, "id", "discharge_ready_1_4h"), dict(editable=True))
-    utils.deep_update(utils.get_dict_from_list(COL_DICT, "id", "discharge_ready_1_4h"), dict(presentation="dropdown"))
-
+    utils.deep_update(
+        utils.get_dict_from_list(COL_DICT, "id", "wim_1"), dict(editable=True)
+    )
+    utils.deep_update(
+        utils.get_dict_from_list(COL_DICT, "id", "discharge_ready_1_4h"),
+        dict(editable=True),
+    )
+    utils.deep_update(
+        utils.get_dict_from_list(COL_DICT, "id", "discharge_ready_1_4h"),
+        dict(presentation="dropdown"),
+    )
 
     DISCHARGE_OPTIONS = ["Ready", "No", "Review"]
 
@@ -173,6 +182,28 @@ icu_radio_button = html.Div(
     className="radio-group",
 )
 
+save_reset_button = html.Div(
+    [
+        html.Div(
+            [
+                dbc.RadioItems(
+                    id="save-reset",
+                    className="d-grid d-md-flex justify-content-md-end btn-group",
+                    inputClassName="btn-check",
+                    labelClassName="btn btn-outline-info",
+                    labelCheckedClassName="active btn-info",
+                    options=[
+                        {"label": "Save", "value": "tbl-save"},
+                        {"label": "Reset", "value": "tbl-reset"},
+                    ],
+                    value="",
+                )
+            ],
+        ),
+        # html.Div(id="which_icu"),
+    ],
+    className="radio-group",
+)
 
 # main page body currently split into two columns 9:3
 main = dbc.Container(
@@ -180,15 +211,11 @@ main = dbc.Container(
         # All unit content here plus unit selector
         dbc.Row(
             [
-                dbc.Col(
-                    [
-                        html.Div(id="which_icu"),
-                        # html.I(className="fa fa-lungs-virus"),
-                    ],
-                    width={"order": "first", "width": True},
-                ),
-                dbc.Col([icu_radio_button], width={"order": "last", "width": "auto"}),
+                dbc.Col([icu_radio_button], width={'offset':6, 'width':4}),
+                # dbc.Col( [ html.Div(id="which_icu"),], md=6 ),
+                dbc.Col([save_reset_button], md=2),
             ],
+            # className="g-0",
             justify="between",
         ),
         # Unit specific content here
