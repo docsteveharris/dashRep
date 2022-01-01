@@ -2,7 +2,7 @@
 /* restyle radio items */
 .radio-group .form-check {
   padding-left: 0;
-  margin-top: 4px;
+  margin-top: 0px;
 }
 
 .radio-group .btn-group > .form-check:not(:last-child) > .btn {

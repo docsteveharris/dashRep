@@ -34,15 +34,22 @@ TIMEOUT = 60 * 60  # measured in seconds
     [
         Input("interval-data", "n_intervals"),
         Input("icu_active", "data"),
+        Input("tbl-save", "n_clicks"),
+        Input("tbl-reset", "n_clicks"),
     ],
+    State("tbl-main", "data"),
+    prevent_initial_call=True,  # suppress_callback_exceptions does not work
 )
-def update_data_from_source(n_intervals, icu):
+@cache.memoize(timeout=TIMEOUT)
+def update_data_from_source(n_intervals, icu, save_n, reset_n, foo_data):
     """
     stores the data in a dcc.Store
     runs on load and will be triggered each time the table is updated or the REFRESH_INTERVAL elapses
     """
     icu = icu.lower()
     print(f"Updating data for {icu.upper()}")
+    print(f"Save button value was {save_n}")
+    print(f"Reset button value was {reset_n}")
     # prepare the URL
     url_icu = wng.gen_hylode_url("sitrep", icu)
     url_census = wng.gen_hylode_url("census", icu)
@@ -61,6 +68,7 @@ def update_data_from_source(n_intervals, icu):
     Output("tbl-main", "data"),
     Input("tbl-main", "data_timestamp"),
     State("tbl-main", "data"),
+    prevent_initial_call=True,  # suppress_callback_exceptions does not work
 )
 def update_table(timestamp, rows):
     for i, row in enumerate(rows):
@@ -170,10 +178,10 @@ icu_radio_button = html.Div(
             [
                 dbc.RadioItems(
                     id="icu_radio",
-                    className="d-grid d-md-flex justify-content-md-end btn-group",
+                    className="dbc d-grid d-md-flex justify-content-md-end btn-group",
                     inputClassName="btn-check",
-                    labelClassName="btn btn-outline-info",
-                    labelCheckedClassName="active btn-info",
+                    labelClassName="btn btn-outline-primary",
+                    labelCheckedClassName="active btn-primary",
                     options=[
                         {"label": "T03", "value": "T03"},
                         {"label": "T06", "value": "T06"},
@@ -184,6 +192,7 @@ icu_radio_button = html.Div(
                     value="T03",
                 )
             ],
+            className="dbc",
         ),
         # html.Div(id="which_icu"),
     ],
@@ -192,25 +201,13 @@ icu_radio_button = html.Div(
 
 save_reset_button = html.Div(
     [
-        html.Div(
-            [
-                dbc.RadioItems(
-                    id="save-reset",
-                    className="d-grid d-md-flex justify-content-md-end btn-group",
-                    inputClassName="btn-check",
-                    labelClassName="btn btn-outline-info",
-                    labelCheckedClassName="active btn-info",
-                    options=[
-                        {"label": "Save", "value": "tbl-save"},
-                        {"label": "Reset", "value": "tbl-reset"},
-                    ],
-                    value="",
-                )
-            ],
-        ),
-        # html.Div(id="which_icu"),
+        # dbc.ButtonGroup(
+            # [
+                dbc.Button("Save", id="tbl-save", color="success", n_clicks=0, outline=False, size="md"),
+                dbc.Button("Reset", id="tbl-reset", color="warning", n_clicks=0, outline=False, size="md"),
+            # ]
+        # ),
     ],
-    className="radio-group",
 )
 
 # main page body currently split into two columns 9:3
@@ -219,7 +216,7 @@ main = dbc.Container(
         # All unit content here plus unit selector
         dbc.Row(
             [
-                dbc.Col([icu_radio_button], width={'offset':6, 'width':4}),
+                dbc.Col([icu_radio_button], width={"offset": 6, "width": 4}),
                 # dbc.Col( [ html.Div(id="which_icu"),], md=6 ),
                 dbc.Col([save_reset_button], md=2),
             ],
