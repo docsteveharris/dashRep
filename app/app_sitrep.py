@@ -3,6 +3,7 @@ Functions (callbacks) that provide the functionality
 """
 import json
 
+import dash
 import dash_bootstrap_components as dbc
 import dash_daq as daq
 import numpy as np
@@ -19,48 +20,76 @@ from app import app
 
 conf = ConfigFactory.factory()
 
-from flask_caching import Cache
 
-cache = Cache(
-    app.server, config={"CACHE_TYPE": "filesystem", "CACHE_DIR": "cache-directory"}
-)
+def request_data(ward):
+    """
+    Gets data from source system for the named ward
+    
+    :param      ward:  The ward
+    :type       ward:  string
+    """
+    # prepare the URL and get the data as per sitrep API
+    url_ward = wng.gen_hylode_url("sitrep", ward)
+    df_ward = wng.get_hylode_data(url_ward, dev=conf.DEV_HYLODE)
 
-TIMEOUT = 60 * 60  # measured in seconds
+    # prepare the URL and get the data as per census API
+    url_census = wng.gen_hylode_url("census", ward)
+    df_census = wng.get_hylode_data(url_census, dev=conf.DEV_HYLODE)
+
+    # assume census API is correct and drop unmatched patients returned by sitrep
+    df_clean = wng.merge_census_data(df_ward, df_census, dev=conf.DEV_HYLODE)
+
+    # merge in user updates to data
+    df_user = wng.get_user_data(conf.USER_DATA_SOURCE, dev=conf.DEV_USER)
+    # merge in 'empty beds' using the reported skeleton
+    df_skeleton = wng.get_bed_skeleton(ward, conf.SKELETON_DATA_SOURCE, dev=conf.DEV)
+    df_orig = wng.merge_hylode_user_data(df_skeleton, df_clean, df_user)
+    # data wrangling
+    df = wng.wrangle_data(df_orig, conf.COLS)
+    return df
 
 
 @app.callback(
-    output=dict(json_data=Output("table-data", "data")), # output data to store
+    output=dict(json_data=Output("table-data", "data")),  # output data to store
     inputs=dict(
-        tbl_data=State("tbl-main", "data"),
-        icu=Input("icu_active", "data"),
+        dfjson=State("tbl-main", "data"),
+        ward=Input("icu_active", "data"),
         intervals=Input("interval-data", "n_intervals"),
         save_btn=Input("tbl-save", "n_clicks"),
         reset_btn=Input("tbl-reset", "n_clicks"),
     ),
     prevent_initial_call=True,  # suppress_callback_exceptions does not work
 )
-@cache.memoize(timeout=TIMEOUT)
-def data_io(tbl_data, icu, save_btn, reset_btn, intervals):
+def data_io(dfjson, ward, save_btn, reset_btn, intervals):
     """
     stores the data in a dcc.Store
     runs on load and will be triggered each time the table is updated or the REFRESH_INTERVAL elapses
+    kind of routes the load/save/reset actions
     """
+    ctx = dash.callback_context
+    trigger = ctx.triggered[0]
+    print(trigger)
+    ward = ward.lower()
 
-    icu = icu.lower()
-    print(f"Updating data for {icu.upper()}")
-    print(f"Save button value was {save_btn}")
-    print(f"Reset button value was {reset_btn}")
-    # prepare the URL
-    url_icu = wng.gen_hylode_url("sitrep", icu)
-    url_census = wng.gen_hylode_url("census", icu)
+    if trigger['prop_id'] == 'icu_active.data':
+        print(f"***INFO: switching units to {ward}")
+        df = request_data(ward)
+    elif trigger['prop_id'] == 'tbl-reset.n_clicks':
+        print(f"***INFO: resetting to initial data load")
+        df = request_data(ward)
+    elif trigger['prop_id'] == 'tbl-save.n_clicks':
+        print(f"***INFO: CACHING data back to dash.Store")
+        dfo = request_data(ward)
+        # print(dfo.head())
+        dfn = pd.DataFrame.from_records(dfjson)
+        # print(dfn.head())
+        df_edits = utils.tbl_compare(dfo, dfn, cols2save=['wim_1', 'discharge_ready_1_4h'], idx=['mrn'])
+        print(df_edits)
+        # TODO: write function to replay updates onto original
+        # TODO: write function to save updates to database or file store
+    else:
+        raise NotImplementedError
 
-    df_sitrep = wng.get_hylode_data(url_icu, dev=conf.DEV_HYLODE)
-    df_census = wng.get_hylode_data(url_census, dev=conf.DEV_HYLODE)
-    df_hylode = wng.merge_census_data(df_sitrep, df_census, dev=conf.DEV_HYLODE)
-    df_user = wng.get_user_data(conf.USER_DATA_SOURCE, dev=conf.DEV_USER)
-    df_skeleton = wng.get_bed_skeleton(icu, conf.SKELETON_DATA_SOURCE, dev=conf.DEV)
-    df_orig = wng.merge_hylode_user_data(df_skeleton, df_hylode, df_user)
-    df = wng.wrangle_data(df_orig, conf.COLS)
     return dict(json_data=df.to_dict("records"))
 
 
@@ -202,10 +231,19 @@ icu_radio_button = html.Div(
 save_reset_button = html.Div(
     [
         # dbc.ButtonGroup(
-            # [
-                dbc.Button("Save", id="tbl-save", color="success", n_clicks=0, outline=False, size="md"),
-                dbc.Button("Reset", id="tbl-reset", color="warning", n_clicks=0, outline=False, size="md"),
-            # ]
+        # [
+        dbc.Button(
+            "Save", id="tbl-save", color="success", n_clicks=0, outline=False, size="md"
+        ),
+        dbc.Button(
+            "Reset",
+            id="tbl-reset",
+            color="warning",
+            n_clicks=0,
+            outline=False,
+            size="md",
+        ),
+        # ]
         # ),
     ],
 )

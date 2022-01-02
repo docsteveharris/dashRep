@@ -1,4 +1,5 @@
 import collections
+import pandas as pd
 
 
 def deep_update(source, overrides):
@@ -33,4 +34,33 @@ def get_dict_from_list(llist, kkey, vval):
         return res
     else:
         raise ValueError(f"{matches} matches for {kkey}={vval}; expected only 1")
+
+
+def tbl_compare(df_old: pd.DataFrame, df_new: pd.DataFrame, cols2save: list, idx=['mrn']):
+    """
+    compare two dataframes and return a long dataframe with any edits
+    
+    :param      dfo:  dataframe old
+    :param      dfn:  dataframe new
+    :param      idx:  index used to align dataframes
+    """
+
+    dfo = df_old.copy()
+    dfo.reset_index(inplace=True)
+    dfo = dfo[idx + cols2save]
+
+    dfn = df_new.copy()
+    dfn.reset_index(inplace=True)
+    dfn = dfn[idx + cols2save]
+
+    import pdb; pdb.set_trace()
+
+    dfo.set_index(idx, inplace=True)  
+    dfr = dfn.compare(dfo, align_axis=0)
+    dfr['compared_at'] = pd.Timestamp.now() 
+    dfr.rename(index={'self':'new', 'other':'old'}, inplace=True)
+    dfr.reset_index(level=2, inplace=True)
+    dfr.rename(columns=dict(level_2='data_source'), inplace=True)
+    return dfr
+
   

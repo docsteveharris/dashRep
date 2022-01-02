@@ -9,6 +9,9 @@ import arrow
 import numpy as np
 import pandas as pd
 import requests
+
+import utils
+
 from config import ConfigFactory
 
 conf = ConfigFactory.factory()

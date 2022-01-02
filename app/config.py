@@ -42,7 +42,7 @@ class Config:
     # Checks for remote updates on the server
     # TODO: feels like we need to run as a check that looks for an update time stamp but does not update the table
     # until the server data changes
-    REFRESH_INTERVAL = 5 * 60 * 1000  # milliseconds
+    REFRESH_INTERVAL = 60 * 60 * 1000  # milliseconds
 
     COLS = OrderedDict(
         {
@@ -50,7 +50,7 @@ class Config:
             "bed_code": "Bed code",
             "bay": "Bay",
             "bed": "Bed",
-            # 'admission_dt': 'Admission',
+            'admission_dt': 'Admission',
             "elapsed_los_td": "LoS",
             "mrn": "MRN",
             "name": "Full Name",
