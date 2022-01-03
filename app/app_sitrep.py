@@ -50,7 +50,7 @@ def request_data(ward):
 
 
 @app.callback(
-    output=dict(json_data=Output("table-data", "data")),  # output data to store
+    output=dict(json_data=Output("source-data", "data")),  # output data to store
     inputs=dict(
         dfjson=State("tbl-main", "data"),
         ward=Input("icu_active", "data"),
@@ -79,14 +79,25 @@ def data_io(dfjson, ward, save_btn, reset_btn, intervals):
         df = request_data(ward)
     elif trigger['prop_id'] == 'tbl-save.n_clicks':
         print(f"***INFO: CACHING data back to dash.Store")
+        # collect the data from source
         dfo = request_data(ward)
-        # print(dfo.head())
+        # collect the data from the displayed datatable
         dfn = pd.DataFrame.from_records(dfjson)
-        # print(dfn.head())
+        # compare
         df_edits = utils.tbl_compare(dfo, dfn, cols2save=['wim_1', 'discharge_ready_1_4h'], idx=['mrn'])
-        print(df_edits)
+        if df_edits.shape[0]:
+            print(df_edits)
+            # TODO: write function to save updates to database or file store (i.e. user data)
+            # then re-rerun request_data which should now bring in fresh 'user data'
+            # return this
+        else:
+            print("***WARNING: No edits found to save")
+            # return just the original data
+            df = dfo
+
         # TODO: write function to replay updates onto original
-        # TODO: write function to save updates to database or file store
+        # this should be part of the 'read data in' i.e. just uses the existing 'merge user' functionality
+
     else:
         raise NotImplementedError
 
@@ -100,6 +111,7 @@ def data_io(dfjson, ward, save_btn, reset_btn, intervals):
     prevent_initial_call=True,  # suppress_callback_exceptions does not work
 )
 def update_table(timestamp, rows):
+    # TODO: can you highlight using colour those fields that are edited but not saved
     for i, row in enumerate(rows):
         if i == 2:
             print(row)
@@ -108,15 +120,20 @@ def update_table(timestamp, rows):
 
 @app.callback(
     Output("datatable-main", "children"),
-    Input("table-data", "data"),
+    Input("source-data", "data"),
     State("icu_active", "data"),
 )
 def gen_datatable_main(json_data, icu):
     print(f"Working with {icu}")
+
+    # datatable defined by columns and by input data
+    # abstract this to function so that you can guarantee the same data each time
+
     COL_DICT = [
         {"name": v, "id": k} for k, v in conf.COLS.items() if k in conf.COLS_FULL
     ]
 
+    # prepare properties of columns
     # updates b/c list are mutable
     utils.deep_update(
         utils.get_dict_from_list(COL_DICT, "id", "wim_1"), dict(editable=True)
@@ -312,8 +329,8 @@ dash_only = html.Div(
         dcc.Interval(id="interval-data", interval=conf.REFRESH_INTERVAL, n_intervals=0),
         # which ICU?
         dcc.Store(id="icu_active"),
-        # use this to table-data when the data changes
-        dcc.Store(id="table-data"),
+        # use this to source-data when the data changes
+        dcc.Store(id="source-data"),
         # dcc.Store(id="tbl-active-row"),
         dcc.Store(id="tbl-side-selection"),
     ]

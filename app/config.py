@@ -66,6 +66,10 @@ class Config:
         }
     )
 
+    COLS_DTYPE = {
+        "mrn": str
+    }
+
     COLS_FULL = ["bay", "bed", "name", "mrn", "admission_age_years", "sex", "wim_1", "discharge_ready_1_4h"]
     # COLS_FULL = {i:COLS[i] for i in COLS_FULL}
 

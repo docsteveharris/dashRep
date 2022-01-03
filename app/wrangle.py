@@ -46,13 +46,14 @@ def gen_hylode_url(url, ward):
     return res
 
 
-def get_hylode_data(file_or_url: str, dev: bool = False) -> pd.DataFrame:
+def get_hylode_data(file_or_url: str, dtype: dict = conf.COLS_DTYPE, dev: bool = False) -> pd.DataFrame:
     """
     Reads a data.
 
     :param      file_or_url:  The file or url
-    :type       file_or_url:  any valid string path is acceptable
     :param      dev:    if True works on a file else uses requests and the API
+    :param      dtype:  as per dtype in pd.from_dict or pd.read_json
+                        enforces datatypes
 
     :returns:   pandas dataframe
     :rtype:     pandas dataframe
@@ -60,9 +61,9 @@ def get_hylode_data(file_or_url: str, dev: bool = False) -> pd.DataFrame:
     if not dev:
         r = requests.get(file_or_url)
         assert r.status_code == 200
-        df = pd.DataFrame.from_dict(r.json()["data"])
+        df = pd.DataFrame.from_dict(r.json(dtype=dtype)["data"])
     else:
-        df = pd.read_json(file_or_url)
+        df = pd.read_json(file_or_url, dtype=dtype)
     return df
 
 

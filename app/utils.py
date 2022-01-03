@@ -46,21 +46,20 @@ def tbl_compare(df_old: pd.DataFrame, df_new: pd.DataFrame, cols2save: list, idx
     """
 
     dfo = df_old.copy()
-    dfo.reset_index(inplace=True)
-    dfo = dfo[idx + cols2save]
+    dfo.set_index(idx, inplace=True, drop=True)
+    dfo = dfo[cols2save]
 
     dfn = df_new.copy()
-    dfn.reset_index(inplace=True)
-    dfn = dfn[idx + cols2save]
+    dfn.set_index(idx, inplace=True, drop=True)
+    dfn = dfn[cols2save]
 
-    import pdb; pdb.set_trace()
+    assert all(dfo.columns.sort_values() == dfo.columns.sort_values())
 
-    dfo.set_index(idx, inplace=True)  
     dfr = dfn.compare(dfo, align_axis=0)
     dfr['compared_at'] = pd.Timestamp.now() 
     dfr.rename(index={'self':'new', 'other':'old'}, inplace=True)
-    dfr.reset_index(level=2, inplace=True)
-    dfr.rename(columns=dict(level_2='data_source'), inplace=True)
+    dfr.reset_index(level=1, inplace=True)
+    dfr.rename(columns=dict(level_1='data_source'), inplace=True)
     return dfr
 
   
