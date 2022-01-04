@@ -32,7 +32,7 @@ def prep_cols_for_table(df, cols):
 
 
 def gen_hylode_url(url, ward):
-    ward = ward.lower()
+    ward = ward.upper()
     if url == "sitrep":
         res = conf.HYLODE_ICU_LIVE
         res = res.format(ward=ward)
@@ -61,9 +61,11 @@ def get_hylode_data(file_or_url: str, dtype: dict = conf.COLS_DTYPE, dev: bool =
     if not dev:
         r = requests.get(file_or_url)
         assert r.status_code == 200
-        df = pd.DataFrame.from_dict(r.json(dtype=dtype)["data"])
+        df = pd.DataFrame.from_dict(r.json()["data"])
     else:
-        df = pd.read_json(file_or_url, dtype=dtype)
+        df = pd.read_json(file_or_url)
+    for k, v in dtype.items():
+        df[k] = df[k].astype(v)
     return df
 
 
