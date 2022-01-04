@@ -96,7 +96,7 @@ class Production(Config):
     HYLODE_EMAP_CENSUS = "http://172.16.149.205:5006/emap/census/{ward}/"
 
     DEV_USER = True
-    USER_DATA_SOURCE = Path("data/user_edits.csv")
+    USER_DATA_SOURCE = create_engine("sqlite:///data/sitrep.db")
 
 
 class Development(Config):
@@ -106,7 +106,7 @@ class Development(Config):
     HYLODE_EMAP_CENSUS = "data/census_{ward}.json"
 
     DEV_USER = True
-    USER_DATA_SOURCE = "data/user_edits.csv"
+    USER_DATA_SOURCE = create_engine("sqlite:///data/sitrep.db")
 
 
 header = dbc.Container(

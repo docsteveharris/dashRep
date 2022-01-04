@@ -98,16 +98,13 @@ def merge_census_data(
     return df
 
 
-def get_user_data(file_or_url: str, dev: bool = False) -> pd.DataFrame:
+def get_user_data(table: str, engine, dev: bool = False) -> pd.DataFrame:
     """
     Get's user data; stored for now locally as CSV
     :returns:   pandas dataframe with three cols ward,bed,wim_r
     """
-    if dev:
-        df = pd.read_csv(file_or_url)
-        return df
-    else:
-        raise NotImplementedError
+    df = pd.read_sql(table, con=engine, index_col=None)
+    return df
 
 
 def get_bed_skeleton(ward: str, file_or_url: str, dev: bool = False) -> pd.DataFrame:
@@ -131,14 +128,55 @@ def get_bed_skeleton(ward: str, file_or_url: str, dev: bool = False) -> pd.DataF
     return df
 
 
+def apply_user_edits(df, df_user, recency_hours=12):
+    # prepare user data 
+    # filter user dataframe to most recent edits for that patient and that ward
+    ward = df['ward_code'][0]
+    dfu = df_user.loc[df_user['data_source'] == 'new',:]
+    dfu = dfu.loc[df_user['ward_code'] == ward,:]
+    # TODO: make this a config setting
+    # drop edits if > 12h old
+    dfu = dfu.loc[dfu['compared_at'] > pd.Timestamp.now() - pd.Timedelta(hours=recency_hours), :]
+    # keep only the most recent edits for each variable
+    dfu.sort_values(['mrn', 'variable', 'compared_at'], ascending=[True, True, True], inplace=True)
+    dfu.drop_duplicates(keep='last', inplace=True)
+
+    for row in dfu.itertuples(index=False):
+        u_edit = row._asdict()
+        var = u_edit['variable'] 
+        val = u_edit['value']
+        mrn = u_edit['mrn']
+        
+        # convert to appropriate type
+        col_type = df[var]
+        if pd.api.types.is_string_dtype(col_type):
+            val = str(val)
+        elif pd.api.types.is_float_dtype(col_type):
+            val = float(val)
+        elif pd.api.types.is_integer_dtype(col_type):
+            val = int(float(val))
+        elif pd.api.types.is_datetime64_any_dtype(col_type):
+            val = pd.to_datetime(var)
+        else:
+            raise NotImplementedError
+            
+        df.loc[df['mrn'] == mrn, var] = val
+
+    return df
+
+
 def merge_hylode_user_data(df_skeleton, df_hylode, df_user) -> pd.DataFrame:
     """
     Merges HYLODE data onto a skeleton for the ward
     This allows blanks (empty) beds to be represented
     Then merges on any user updates
     """
-    df = df_skeleton.merge(df_hylode, how="left", on=["ward_code", "bed_code"])
-    df = df.merge(df_user, how="left", on=["ward_code", "bed_code"])
+    df = apply_user_edits(df_hylode, df_user)
+    # merge data onto skeleton to create 'empty beds'
+    df = df_skeleton.merge(df, how="left", on=["ward_code", "bed_code"])
+
+
+    # create an empty bed indicator variable
     df["bed_empty"] = False
     df.loc[df.name.isnull(), "bed_empty"] = True
     return df
@@ -202,31 +240,25 @@ def select_cols(df: pd.DataFrame, keep_cols: list):
     return df[keep_cols]
 
 
-def write_data(df: pd.DataFrame, file_or_url: str):
+def write_data(df: pd.DataFrame, table: str,  engine, replace: bool =False):
     """
-    :df: dataframe from app, should be single row
-    :file_or_url: target dataframe as csv
+    Write user edits to user edit db
+    
+    :param      df:           { parameter_description }
+    :type       df:           { type_description }
+    :param      file_or_url:  The file or url
+    :type       file_or_url:  str
     """
-    cols = ["ward_code", "bed_code", "wim_r"]
-
-    bed = df["bed_code"]
-    ward = df["ward_code"]
-    wim_r = df["wim_r"]
-
-    # first read from existing source df origin (dfo)
-    dfo = pd.read_csv(file_or_url)
-    # now filter by new data
-    matching_row = dfo.index[
-        (dfo["ward_code"] == ward) & (dfo["bed_code"] == bed)
-    ].to_list()
-    # then check if key in source
-    # if key then replace
-    if len(matching_row) == 1:
-        res = dfo.copy()
-        res.loc[matching_row, "wim_r"] = wim_r
+    dfn = df.reset_index(drop=True)
+    if replace:
+        # housekeeping drop duplicates to keep the database tidy
+        # dfo = original dfn = new
+        dfo = pd.read_sql(table, con=engine, index_col=None)
+        dfu = pd.concat([dfn,dfo])
+        # TODO: factor out the hard coding of variable names here
+        dfu.sort_values(['mrn', 'variable', 'compared_at'], ascending=[True, True, True], inplace=True)
+        dfu.drop_duplicates(keep='last', inplace=True)
+        dfu.to_sql(table, con=engine, if_exists='replace')
     else:
-        # else append
-        res = dfo.append(df[cols])
+        dfn.to_sql(table, con=engine, index=False, if_exists='append')
 
-    res[cols].to_csv(file_or_url, index=False)
-    return True

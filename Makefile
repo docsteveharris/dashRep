@@ -20,7 +20,7 @@ help : Makefile
 .PHONY: app-build
 app-build:
 	docker-compose build \
- 		 --build-arg http_proxy \
+		 --build-arg http_proxy \
 		 --build-arg https_proxy \
 		 --build-arg HTTP_PROXY \
 		 --build-arg HTTPS_PROXY 
@@ -36,3 +36,9 @@ app-run:
 .PHONY: app-down
 app-down:
 	docker-compose down
+
+
+## udb-recreate     : ReCreate local SQLite database to hold user edits
+.PHONY: udb-recreate
+udb-recreate:
+	python utils/setup_sitrep_db.py --drop_old

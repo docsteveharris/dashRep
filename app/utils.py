@@ -36,9 +36,10 @@ def get_dict_from_list(llist, kkey, vval):
         raise ValueError(f"{matches} matches for {kkey}={vval}; expected only 1")
 
 
-def tbl_compare(df_old: pd.DataFrame, df_new: pd.DataFrame, cols2save: list, idx=['mrn']):
+def tbl_compare(df_old: pd.DataFrame, df_new: pd.DataFrame, cols2save: list, idx=['ward_code', 'mrn']):
     """
     compare two dataframes and return a long dataframe with any edits
+    must be indexed by ward_code and mrn
     
     :param      dfo:  dataframe old
     :param      dfn:  dataframe new
@@ -58,8 +59,12 @@ def tbl_compare(df_old: pd.DataFrame, df_new: pd.DataFrame, cols2save: list, idx
     dfr = dfn.compare(dfo, align_axis=0)
     dfr['compared_at'] = pd.Timestamp.now() 
     dfr.rename(index={'self':'new', 'other':'old'}, inplace=True)
-    dfr.reset_index(level=1, inplace=True)
-    dfr.rename(columns=dict(level_1='data_source'), inplace=True)
+    dfr.reset_index(level=2, inplace=True)
+    dfr.rename(columns=dict(level_2='data_source'), inplace=True)
+
+    # convert to long
+    dfr = dfr.reset_index().melt(id_vars=['ward_code', 'mrn', 'compared_at', 'data_source'])
+
     return dfr
 
   

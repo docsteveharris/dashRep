@@ -40,7 +40,7 @@ def request_data(ward):
     df_clean = wng.merge_census_data(df_ward, df_census, dev=conf.DEV_HYLODE)
 
     # merge in user updates to data
-    df_user = wng.get_user_data(conf.USER_DATA_SOURCE, dev=conf.DEV_USER)
+    df_user = wng.get_user_data('sitrep_edits', conf.USER_DATA_SOURCE, dev=conf.DEV_USER)
     # merge in 'empty beds' using the reported skeleton
     df_skeleton = wng.get_bed_skeleton(ward, conf.SKELETON_DATA_SOURCE, dev=conf.DEV)
     df_orig = wng.merge_hylode_user_data(df_skeleton, df_clean, df_user)
@@ -84,12 +84,14 @@ def data_io(dfjson, ward, save_btn, reset_btn, intervals):
         # collect the data from the displayed datatable
         dfn = pd.DataFrame.from_records(dfjson)
         # compare
-        df_edits = utils.tbl_compare(dfo, dfn, cols2save=['wim_1', 'discharge_ready_1_4h'], idx=['mrn'])
+        df_edits = utils.tbl_compare(dfo, dfn, cols2save=['wim_1', 'discharge_ready_1_4h'], idx=['ward_code', 'mrn'])
         if df_edits.shape[0]:
             print(df_edits)
             # TODO: write function to save updates to database or file store (i.e. user data)
+            wng.write_data(df_edits, 'sitrep_edits', conf.USER_DATA_SOURCE)
             # then re-rerun request_data which should now bring in fresh 'user data'
             # return this
+            df = request_data(ward)
         else:
             print("***WARNING: No edits found to save")
             # return just the original data
