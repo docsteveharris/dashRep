@@ -13,12 +13,13 @@ from datetime import datetime, date
 import argparse
 from faker import Faker
 
+units = ['T03', 'T06', 'WMS']
 parser = argparse.ArgumentParser(description="Anonymise data from ICU/Live API")
-parser.add_argument('unit', type=str, help='Unit name: one of T03,T06')
+parser.add_argument('unit', type=str, help=f"Unit name: one of {', '.join(units)}")
 args = parser.parse_args()
 
 unit = args.unit.lower()
-units = [i.lower() for i in ['T03', 'T06']]
+units = [i.lower() for i in units]
 assert unit in units 
 
 fake = Faker()

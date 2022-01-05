@@ -1,0 +1,87 @@
+[
+    {
+        "csn": "1084430340",
+        "mrn": "42861496",
+        "name": "Jeffrey Howe",
+        "dob": "1991-08-05",
+        "sex": "M",
+        "ethnicity": [
+            null
+        ],
+        "postcode": "09233",
+        "admission_dt": "2022-01-04T17:30:00+00:00",
+        "discharge_dt": null,
+        "bed_code": "CB01-01",
+        "bay_code": "CB",
+        "bay_type": "Regular",
+        "ward_code": "WMS"
+    },
+    {
+        "csn": "1031066295",
+        "mrn": "47223017",
+        "name": "Joseph Bailey",
+        "dob": "1958-07-02",
+        "sex": "M",
+        "ethnicity": [
+            null
+        ],
+        "postcode": "18061",
+        "admission_dt": "2022-01-05T16:20:00+00:00",
+        "discharge_dt": null,
+        "bed_code": "CB02-02",
+        "bay_code": "CB",
+        "bay_type": "Regular",
+        "ward_code": "WMS"
+    },
+    {
+        "csn": "1030892884",
+        "mrn": "44521450",
+        "name": "Tanya Frazier",
+        "dob": "1973-06-05",
+        "sex": "F",
+        "ethnicity": [
+            null
+        ],
+        "postcode": "28985",
+        "admission_dt": "2022-01-04T19:56:00+00:00",
+        "discharge_dt": null,
+        "bed_code": "CB03-03",
+        "bay_code": "CB",
+        "bay_type": "Regular",
+        "ward_code": "WMS"
+    },
+    {
+        "csn": "1097405146",
+        "mrn": "41106930",
+        "name": "John Chan",
+        "dob": "1923-04-07",
+        "sex": "M",
+        "ethnicity": [
+            null
+        ],
+        "postcode": "89853",
+        "admission_dt": "2022-01-04T15:15:00+00:00",
+        "discharge_dt": null,
+        "bed_code": "CB05-05",
+        "bay_code": "CB",
+        "bay_type": "Regular",
+        "ward_code": "WMS"
+    },
+    {
+        "csn": "1042537934",
+        "mrn": "49210759",
+        "name": "Brandon Khan",
+        "dob": "2011-02-11",
+        "sex": "M",
+        "ethnicity": [
+            null
+        ],
+        "postcode": "12151",
+        "admission_dt": "2021-12-02T19:04:00+00:00",
+        "discharge_dt": null,
+        "bed_code": "CB08-08",
+        "bay_code": "CB",
+        "bay_type": "Regular",
+        "ward_code": "WMS"
+    }
+]
