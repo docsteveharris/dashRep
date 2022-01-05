@@ -4,9 +4,9 @@ import arrow
 import pandas as pd
 import plotly.express as px
 import requests
-from config import ConfigFactory
 import logging
 
+from config.config import ConfigFactory
 conf = ConfigFactory.factory()
 
 

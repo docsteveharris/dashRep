@@ -2,11 +2,11 @@
 """
 For debugging
 """
-from config import ConfigFactory
 from dash import dash_table as dt
 from dash import dcc, html
-import wrangle as wng
 
+from wrangle import sitrep as wng
+from config.config import ConfigFactory
 conf = ConfigFactory.factory()
 
 DEBUG_ICU = "T03"

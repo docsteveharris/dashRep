@@ -3,12 +3,13 @@ Principle application file
 https://dash.plotly.com/urls
 """
 import logging
-from config import ConfigFactory
 from dash import Input, Output, dcc, html
-from app_sitrep import sitrep
-from app_debug import debug
-from app_covid import covid
-from app_ed import ed
+
+from config.config import ConfigFactory
+from sitrep.sitrep import sitrep
+from debug.debug import debug
+from covid.covid import covid
+from ed.ed import ed
 from landing import landing
 
 from app import app

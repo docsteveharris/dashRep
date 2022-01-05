@@ -4,8 +4,8 @@ Menu and landing page
 from dash import dcc, html
 import dash_bootstrap_components as dbc
 
-from config import ConfigFactory
-from config import header, nav, footer
+from config.config import ConfigFactory
+from config.config import header, nav, footer
 
 
 main = html.Div([

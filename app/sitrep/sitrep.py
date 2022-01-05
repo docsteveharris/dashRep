@@ -3,20 +3,24 @@ Functions (callbacks) that provide the functionality
 """
 import json
 
+import numpy as np
+import pandas as pd
+
+import plotly.graph_objects as go
+
 import dash
 import dash_bootstrap_components as dbc
 import dash_daq as daq
-import numpy as np
-import pandas as pd
-import plotly.graph_objects as go
-import wrangle as wng
-from config import ConfigFactory, footer, header, nav
 from dash import Dash, Input, Output, State
 from dash import dash_table as dt
 from dash import dcc, html
 
-import utils
+
+# from .wrangle import sitrep as wng
+from wrangle import sitrep as wng
+from utils import utils
 from app import app
+from config.config import ConfigFactory, footer, header, nav
 
 conf = ConfigFactory.factory()
 

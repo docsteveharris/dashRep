@@ -3,16 +3,19 @@ Display local COVID information
 """
 import arrow
 import datetime
-import dash_bootstrap_components as dbc
+import requests
 import pandas as pd
+
 import plotly.express as px
 import plotly.graph_objects as go
-import requests
-from config import header, nav
+
 from dash import Dash, Input, Output, State
 from dash import dash_table as dt
 from dash import dcc, html
-from wrangle_govuk import CASES_BY_AGE, HOSP_CASES
+import dash_bootstrap_components as dbc
+
+from config.config import header, nav
+from wrangle.covid import CASES_BY_AGE, HOSP_CASES
 
 from app import app
 

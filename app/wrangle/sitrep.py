@@ -12,7 +12,7 @@ import requests
 
 import utils
 
-from config import ConfigFactory
+from config.config import ConfigFactory
 
 conf = ConfigFactory.factory()
 
