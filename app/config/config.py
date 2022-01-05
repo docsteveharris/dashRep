@@ -20,7 +20,7 @@ from dotenv import find_dotenv, load_dotenv
 from sqlalchemy import create_engine
 
 # .env file stored at project root
-dotenv_path = Path(__file__).parent.parent.resolve() / ".env"
+dotenv_path = Path(__file__).parent.parent.parent.resolve() / ".env"
 load_dotenv(dotenv_path=dotenv_path)
 
 
