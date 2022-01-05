@@ -1,9 +1,9 @@
 import dash_bootstrap_components as dbc
+from config.config import ConfigFactory, footer, header, nav
 from dash import dcc, html
+
 from . import callbacks
 
-
-from config.config import ConfigFactory, footer, header, nav
 conf = ConfigFactory.factory()
 
 
@@ -63,6 +63,10 @@ save_reset_button = html.Div(
     ],
 )
 
+gauge_occupancy = html.Div(id="gauge_occupancy")
+gauge_work = html.Div(id="gauge_work")
+
+
 # main page body currently split into two columns 9:3
 main = dbc.Container(
     [
@@ -76,41 +80,31 @@ main = dbc.Container(
             # className="g-0",
             justify="between",
         ),
-        # Unit specific content here
+        dbc.Row(
+            [
+                dbc.Col(dbc.Card([
+                    html.H6("Occupancy"),
+                    gauge_occupancy,
+                    ], body=True), md=4),
+                dbc.Col(dbc.Card([
+                    html.H6("Work Intensity"),
+                    gauge_work,
+                    ], body=True), md=4),
+                # dbc.Col(gauge_work, md=4),
+                # dbc.Col(gauge_discharges, md=4),
+            ]
+        ),
+        # Data table
         dbc.Row(
             [
                 dbc.Col(
-                    [html.Div(id="datatable-main")],
-                    md=6,
-                ),
-                dbc.Col(
-                    [
-                        dbc.Row(
-                            [
-                                dbc.Card(
-                                    [
-                                        dbc.CardHeader("Ward aggregate details"),
-                                        dbc.CardBody("CardBody"),
-                                        dbc.CardFooter("CardFooter"),
-                                    ]
-                                ),
-                            ],
-                            align="start",
+                    dbc.Card([
+                        dbc.CardHeader(html.H6("Patient list")),
+                        dbc.CardBody(html.Div(id="datatable-main")),
+                        ],
+                        # body=True
                         ),
-                        dbc.Row(
-                            [
-                                dbc.Card(
-                                    [
-                                        dbc.CardHeader("Patient specific details"),
-                                        dbc.CardBody("CardBody"),
-                                        dbc.CardFooter("CardFooter"),
-                                    ]
-                                ),
-                            ],
-                            align="end",
-                        ),
-                    ],
-                    md=6,
+                    md=12,
                 ),
             ],
             align="start",

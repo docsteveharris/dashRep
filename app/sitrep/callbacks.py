@@ -21,6 +21,10 @@ from config.config import ConfigFactory, footer, header, nav
 
 conf = ConfigFactory.factory()
 
+def count_beds_in_ward_skeleton(ward):
+    df_skeleton = wng.get_bed_skeleton(ward, conf.SKELETON_DATA_SOURCE, dev=conf.DEV)
+    return df_skeleton.shape[0]
+
 
 def request_data(ward):
     """
@@ -210,3 +214,82 @@ def store_icu_active(value):
 @app.callback(Output("which_icu", "children"), Input("icu_active", "data"))
 def display_icu_active(value):
     return html.H3(f"You are inspecting {value.upper()}")
+
+
+@app.callback(
+    Output("gauge_occupancy", "children"),
+    Input("source-data", "data"),
+    Input("icu_active", "data"),
+    )
+def gauge_occupancy(json_data, ward):
+    """
+    Generates the graduated bar summarising current occupancy
+
+    :param      json_data:  json representation of the current dataframe
+    :type       json_data:  { type_description }
+    """
+    df = pd.DataFrame.from_records(json_data)
+    occ_max = count_beds_in_ward_skeleton(ward)
+
+    occ = df.mrn.count()
+    occ_scaled = occ / occ_max * 10
+
+    res = daq.GraduatedBar(
+        color={
+            "gradient": True,
+            "ranges": {"green": [0, 4], "yellow": [4, 7], "red": [7, 10]},
+        },
+        showCurrentValue=True,
+        # vertical=True,
+        value=occ_scaled,
+    )
+
+    return res
+
+
+@app.callback(
+    Output("gauge_work", "children"),
+    Input("source-data", "data"),
+    Input("icu_active", "data"),
+    )
+def gauge_work(json_data, ward):
+    """
+    Generates the graduated bar summarising current work intensity
+    Assumes the max possible is ?5x the number number of beds
+
+    :param      json_data:  json representation of the current dataframe
+    :type       json_data:  { type_description }
+    """
+    df = pd.DataFrame.from_records(json_data)
+
+    wim_max = count_beds_in_ward_skeleton(ward) * 4
+    wim_sum = df["wim_1"].sum()
+    wim_sum_scaled = wim_sum / wim_max * 10
+
+    res = daq.GraduatedBar(
+        color={
+            "gradient": True,
+            "ranges": {"green": [0, 4], "yellow": [4, 7], "red": [7, 10]},
+        },
+        showCurrentValue=True,
+        # vertical=True,
+        value=wim_sum_scaled,
+    )
+
+    return res
+
+
+    occ = df.mrn.count()
+    occ_scaled = occ / occ_max * 10
+
+    res = daq.GraduatedBar(
+        color={
+            "gradient": True,
+            "ranges": {"green": [0, 4], "yellow": [4, 7], "red": [7, 10]},
+        },
+        showCurrentValue=True,
+        # vertical=True,
+        value=occ_scaled,
+    )
+
+    return res
