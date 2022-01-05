@@ -6,7 +6,7 @@ import logging
 from dash import Input, Output, dcc, html
 
 from config.config import ConfigFactory
-from sitrep.sitrep import sitrep
+from sitrep.layout import sitrep
 from debug.debug import debug
 from covid.covid import covid
 from ed.ed import ed

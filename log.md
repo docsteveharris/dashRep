@@ -32,3 +32,7 @@ problems to fix with patient's who should have been discharged still appearing?
 ## 2021-12-22
 Set-up functionality to clean sitrep data by checking census data
 
+## 2022-01-05
+reorganised code into submodules
+feature parity
+reorganise layout so wider table with 'dials' at top
