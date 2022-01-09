@@ -36,3 +36,8 @@ Set-up functionality to clean sitrep data by checking census data
 reorganised code into submodules
 feature parity
 reorganise layout so wider table with 'dials' at top
+
+## 2022-01-09
+rebuilt the app on hyfield
+moved the repo into hylode
+now going to try and run the infection control query

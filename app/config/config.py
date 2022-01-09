@@ -16,7 +16,7 @@ from pathlib import Path
 import dash_bootstrap_components as dbc
 import pandas as pd
 from dash import dcc, html
-from dotenv import find_dotenv, load_dotenv
+from dotenv import find_dotenv, load_dotenv, dotenv_values
 from sqlalchemy import create_engine
 
 # .env file stored at project root
@@ -36,6 +36,11 @@ class ConfigFactory(object):
 class Config:
     """Base Config"""
 
+    SECRETS = {
+        **environ,
+        **dotenv_values(dotenv_path),
+    }
+    
     SERVER_HOST = "0.0.0.0"
     SERVER_PORT = 8009
 
